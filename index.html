@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Mis Objetivos</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#111318; --card:#1e2130; --card2:#252a3a; --border:#2d3347;
+    --light:#edeae0; --muted:#6b7194;
+    --work:#e05c2a; --health:#2ecc71; --finance:#f5a623; --family:#a78bfa; --recurring:#38bdf8;
+    --danger:#e74c3c;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{background:var(--bg);color:var(--light);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:5rem;}
+
+  /* NAV */
+  .nav{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:2px solid var(--border);}
+  .nav-header{padding:1.2rem 1.2rem .5rem;display:flex;justify-content:space-between;align-items:baseline;}
+  .nav-header h1{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:3px;}
+  .nav-header h1 span{color:var(--finance);}
+  .nav-tabs{display:flex;}
+  .nav-tab{flex:1;text-align:center;padding:.65rem .5rem;font-size:.78rem;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.5px;}
+  .nav-tab.active{color:var(--light);border-bottom-color:var(--finance);}
+
+  /* PAGES */
+  .page{display:none;padding:1rem 1.2rem;}
+  .page.active{display:block;}
+
+  /* PROGRESS */
+  .overall{background:var(--card);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1rem;}
+  .overall-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.5rem;}
+  .overall-label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+  .overall-pct{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--finance);}
+  .big-bar{height:6px;background:var(--border);border-radius:3px;}
+  .big-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--work),var(--finance));width:0%;transition:width .6s ease;}
+
+  /* CAT FILTER */
+  .cat-tabs{display:flex;gap:.4rem;overflow-x:auto;scrollbar-width:none;padding-bottom:.3rem;margin-bottom:1rem;}
+  .cat-tabs::-webkit-scrollbar{display:none;}
+  .cat-tab{flex-shrink:0;padding:.35rem .9rem;border-radius:20px;font-size:.75rem;font-weight:600;border:1.5px solid var(--border);color:var(--muted);cursor:pointer;background:var(--card);transition:all .2s;}
+  .cat-tab.active{color:white;border-color:transparent;}
+  .cat-tab[data-cat="all"].active{background:var(--finance);}
+  .cat-tab[data-cat="work"].active{background:var(--work);}
+  .cat-tab[data-cat="health"].active{background:var(--health);}
+  .cat-tab[data-cat="finance"].active{background:var(--finance);}
+  .cat-tab[data-cat="family"].active{background:var(--family);}
+
+  /* OBJ CARDS */
+  .objectives{display:flex;flex-direction:column;gap:.8rem;}
+  .obj-card{background:var(--card);border-radius:12px;overflow:hidden;border-left:4px solid var(--work);}
+  .obj-card[data-cat="health"]{border-left-color:var(--health);}
+  .obj-card[data-cat="finance"]{border-left-color:var(--finance);}
+  .obj-card[data-cat="family"]{border-left-color:var(--family);}
+  .obj-card.hidden{display:none;}
+
+  .obj-header{padding:.9rem 1rem .6rem;display:flex;align-items:center;gap:.7rem;}
+  .obj-icon{font-size:1.3rem;flex-shrink:0;cursor:pointer;}
+  .obj-info{flex:1;min-width:0;cursor:pointer;}
+  .obj-name{font-size:.92rem;font-weight:700;}
+  .obj-meta{font-size:.7rem;color:var(--muted);margin-top:.1rem;}
+  .obj-pct{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;flex-shrink:0;}
+  .obj-card[data-cat="work"] .obj-pct{color:var(--work);}
+  .obj-card[data-cat="health"] .obj-pct{color:var(--health);}
+  .obj-card[data-cat="finance"] .obj-pct{color:var(--finance);}
+  .obj-card[data-cat="family"] .obj-pct{color:var(--family);}
+
+  /* EDIT/DELETE BUTTONS on obj header */
+  .obj-actions{display:flex;gap:.3rem;flex-shrink:0;}
+  .icon-btn{background:none;border:none;cursor:pointer;font-size:1rem;padding:.25rem;border-radius:6px;transition:background .15s;line-height:1;}
+  .icon-btn:hover{background:var(--card2);}
+  .icon-btn.del:hover{background:rgba(231,76,60,.2);}
+  .chevron{font-size:.75rem;color:var(--muted);flex-shrink:0;transition:transform .3s;cursor:pointer;}
+  .obj-card.open .chevron{transform:rotate(180deg);}
+
+  .obj-bar{height:3px;background:var(--border);margin:0 1rem;border-radius:2px;}
+  .obj-bar-fill{height:100%;border-radius:2px;width:0%;transition:width .5s;}
+  .obj-card[data-cat="work"] .obj-bar-fill{background:var(--work);}
+  .obj-card[data-cat="health"] .obj-bar-fill{background:var(--health);}
+  .obj-card[data-cat="finance"] .obj-bar-fill{background:var(--finance);}
+  .obj-card[data-cat="family"] .obj-bar-fill{background:var(--family);}
+
+  .tasks{max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s;padding:0 .6rem;}
+  .tasks.open{max-height:2000px;padding:.7rem .6rem .7rem;}
+
+  /* TASK ROW */
+  .task{background:var(--card2);border-radius:8px;padding:.65rem .9rem;display:flex;align-items:center;gap:.7rem;margin-bottom:.4rem;user-select:none;}
+  .task:last-child{margin-bottom:0;}
+  .task-check{width:20px;height:20px;border:2px solid var(--muted);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:.7rem;color:white;font-weight:700;cursor:pointer;}
+  .task.done .task-check{border-color:var(--health);background:var(--health);}
+  .task.done .task-check::after{content:'✓';}
+  .task.done .task-text{text-decoration:line-through;color:var(--muted);}
+  .task-text{font-size:.85rem;line-height:1.4;flex:1;cursor:pointer;}
+  .task-actions{display:flex;gap:.2rem;flex-shrink:0;}
+
+  .add-task{display:flex;gap:.5rem;margin-top:.5rem;}
+  .add-task input{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;color:var(--light);font-family:'DM Sans',sans-serif;font-size:.82rem;padding:.5rem .8rem;outline:none;}
+  .add-task input:focus{border-color:var(--finance);}
+  .add-task input::placeholder{color:var(--muted);}
+  .add-task button{background:var(--finance);color:#111;border:none;border-radius:8px;font-size:1.2rem;font-weight:700;width:36px;cursor:pointer;}
+
+  /* BOTTOM BTNS */
+  .bottom-btns{display:flex;gap:.7rem;margin-top:1rem;}
+  .btn-primary{flex:1;background:var(--finance);color:#111;border:none;border-radius:20px;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;padding:.55rem 1rem;cursor:pointer;}
+  .btn-secondary{background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.75rem;padding:.5rem 1rem;border-radius:20px;cursor:pointer;letter-spacing:1px;}
+
+  /* RECURRING */
+  .rec-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;}
+  .rec-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;}
+  .rec-date{font-size:.75rem;color:var(--muted);}
+  .streak-box{background:linear-gradient(135deg,#1a2535,#1e2130);border:1px solid var(--recurring);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1rem;display:flex;align-items:center;gap:1rem;}
+  .streak-fire{font-size:2rem;}
+  .streak-num{font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:var(--recurring);line-height:1;}
+  .streak-label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+  .rec-progress{background:var(--card);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1rem;}
+  .rec-progress-top{display:flex;justify-content:space-between;margin-bottom:.5rem;}
+  .rec-progress-label{font-size:.78rem;color:var(--muted);}
+  .rec-progress-count{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--recurring);}
+  .rec-list{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem;}
+
+  .rec-item{background:var(--card);border-radius:10px;padding:.75rem 1rem;display:flex;align-items:center;gap:.8rem;border-left:3px solid var(--recurring);}
+  .rec-check{width:24px;height:24px;border:2px solid var(--recurring);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:white;transition:all .2s;cursor:pointer;}
+  .rec-item.done .rec-check{background:var(--recurring);border-color:var(--recurring);}
+  .rec-item.done .rec-check::after{content:'✓';}
+  .rec-item.done .rec-label{text-decoration:line-through;color:var(--muted);}
+  .rec-label{font-size:.9rem;flex:1;}
+  .rec-icon{font-size:1.2rem;flex-shrink:0;}
+  .rec-actions{display:flex;gap:.2rem;flex-shrink:0;}
+
+  /* CALENDAR */
+  .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+  .cal-month{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:2px;}
+  .cal-btn{background:var(--card);border:none;color:var(--light);font-size:1.1rem;width:36px;height:36px;border-radius:8px;cursor:pointer;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:1rem;}
+  .cal-dow{text-align:center;font-size:.65rem;color:var(--muted);padding:.4rem 0;font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+  .cal-day{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.8rem;cursor:pointer;background:var(--card);position:relative;transition:background .15s;gap:2px;}
+  .cal-day.empty{background:transparent;cursor:default;}
+  .cal-day.today{border:2px solid var(--finance);}
+  .cal-day .day-num{font-size:.78rem;font-weight:600;line-height:1;}
+  .cal-day .dots{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;max-width:28px;}
+  .dot{width:5px;height:5px;border-radius:50%;}
+  .dot.rec{background:var(--recurring);}
+  .dot.obj{background:var(--health);}
+  .dot.full{background:var(--finance);}
+  .cal-legend{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;background:var(--card);border-radius:10px;padding:.8rem 1rem;}
+  .legend-item{display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--muted);}
+  .legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .day-detail{background:var(--card);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1rem;min-height:80px;}
+  .day-detail-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:1px;margin-bottom:.6rem;color:var(--finance);}
+  .detail-item{font-size:.82rem;padding:.3rem 0;border-bottom:1px solid var(--border);color:var(--muted);}
+  .detail-item:last-child{border-bottom:none;}
+  .detail-item span{color:var(--light);}
+
+  /* MODALS */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;}
+  .modal{display:none;position:fixed;bottom:0;left:0;right:0;background:#1a1f2e;border-radius:20px 20px 0 0;padding:1.5rem 1.2rem 2.5rem;z-index:201;border-top:2px solid var(--border);max-height:90vh;overflow-y:auto;}
+  .modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;margin-bottom:1.2rem;}
+  .form-group{margin-bottom:.9rem;}
+  .form-label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.4rem;display:block;}
+  .form-input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;color:var(--light);font-family:'DM Sans',sans-serif;font-size:.9rem;padding:.7rem .9rem;outline:none;}
+  .form-input:focus{border-color:var(--finance);}
+  .emoji-row{display:flex;gap:.5rem;flex-wrap:wrap;}
+  .emoji-opt{font-size:1.4rem;padding:.35rem;border-radius:8px;cursor:pointer;border:2px solid transparent;transition:border-color .15s;}
+  .emoji-opt.selected{border-color:var(--finance);background:rgba(245,166,35,.1);}
+  .color-row{display:flex;gap:.6rem;}
+  .color-opt{width:30px;height:30px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:border-color .15s;flex-shrink:0;}
+  .color-opt.selected{border-color:white;}
+  .modal-btn{width:100%;background:var(--finance);color:#111;border:none;border-radius:10px;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;padding:.85rem;cursor:pointer;margin-top:.5rem;}
+  .modal-btn-danger{background:var(--danger);color:white;}
+  .modal-btn-row{display:flex;gap:.7rem;margin-top:.5rem;}
+  .modal-btn-row .modal-btn{margin-top:0;}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-header">
+    <h1>Mis <span>Objetivos</span></h1>
+    <div style="font-size:.7rem;color:var(--muted)" id="today-label"></div>
+  </div>
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="showPage('objectives')">🎯 Objetivos</div>
+    <div class="nav-tab" onclick="showPage('recurring')">🔄 Rutinas</div>
+    <div class="nav-tab" onclick="showPage('calendar')">📅 Calendario</div>
+  </div>
+</div>
+
+<!-- PAGE: OBJECTIVES -->
+<div class="page active" id="page-objectives">
+  <div class="overall" style="margin-top:.8rem">
+    <div class="overall-top">
+      <span class="overall-label">Progreso general</span>
+      <span class="overall-pct" id="overall-pct">0%</span>
+    </div>
+    <div class="big-bar"><div class="big-bar-fill" id="overall-bar"></div></div>
+  </div>
+  <div class="cat-tabs">
+    <div class="cat-tab active" data-cat="all" onclick="filterCat('all')">Todos</div>
+    <div class="cat-tab" data-cat="work" onclick="filterCat('work')">💼 Negocio</div>
+    <div class="cat-tab" data-cat="health" onclick="filterCat('health')">💪 Salud</div>
+    <div class="cat-tab" data-cat="finance" onclick="filterCat('finance')">💰 Finanzas</div>
+    <div class="cat-tab" data-cat="family" onclick="filterCat('family')">❤️ Personal</div>
+  </div>
+  <div class="objectives" id="objectives">
+
+    <div class="obj-card" data-cat="work" data-id="obj_work">
+      <div class="obj-header">
+        <div class="obj-icon" onclick="toggleObj(this.closest('.obj-card'))">💼</div>
+        <div class="obj-info" onclick="toggleObj(this.closest('.obj-card'))">
+          <div class="obj-name">Abrir la Ferretería</div>
+          <div class="obj-meta">Reapertura y primeras ventas</div>
+        </div>
+        <div class="obj-pct">0%</div>
+        <div class="obj-actions">
+          <button class="icon-btn" onclick="editObjOpen(this.closest('.obj-card'))" title="Editar">✏️</button>
+          <button class="icon-btn del" onclick="deleteObj(this.closest('.obj-card'))" title="Eliminar">🗑️</button>
+        </div>
+        <div class="chevron" onclick="toggleObj(this.closest('.obj-card'))">▼</div>
+      </div>
+      <div class="obj-bar"><div class="obj-bar-fill"></div></div>
+      <div class="tasks">
+        <div class="task" data-id="t1"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Hacer inventario del stock existente</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
+        <div class="task" data-id="t2"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Gestionar habilitación municipal</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
+        <div class="task" data-id="t3"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Acondicionar y limpiar el local</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
+        <div class="task" data-id="t4"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Crear WhatsApp Business + catálogo</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
+        <div class="task" data-id="t5"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Conseguir primer cliente B2B</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
+        <div class="add-task"><input type="text" placeholder="Agregar tarea..." onkeydown="addTask(event,this)"><button onclick="addTask(null,this.previousElementSibling)">+</button></div>
+      </div>
+    </div>
+
+    <div class="obj-card" data-cat="health" data-id="obj_health">
+      <div class="obj-header">
+        <div class="obj-icon" onclick="toggleObj(this.closest('.obj-card'))">💪</div>
+        <div class="obj-info" onclick="toggleObj(this.closest('.obj-card'))">
+          <div class="obj-name">Salud y Energía</div>
+          <div class="obj-meta">Hábitos físicos y mentales</div>
+        </div>
+        <div class="obj-pct">0%</div>
+        <div class="obj-actions">
+          <button class="icon-btn" onclick="editObjOpen(this.closest('.obj-card'))">✏️</button>
+          <button class="icon-btn del" onclick="deleteObj(this.closest('.obj-card'))">🗑️</button>
+        </div>
+        <div class="chevron" onclick="toggleObj(this.closest('.obj-card'))">▼</div>
+      </div>
+      <div class="obj-bar"><div class="obj-bar-fill"></div></div>
+      <div class="tasks">
+        <div class="task" data-id="t6"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Hacer ejercicio 3 veces por semana</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
+        <div class="task" data-id="t7"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Dormir al menos 7 horas</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
+        <div class="task" data-id="t8"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Turno médico / chequeo anual</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
+        <div class="add-task"><input type="text" placeholder="Agregar tarea..." onkeydown="addTask(event,this)"><button onclick="addTask(null,this.previousElementSibling)">+</button></div>
+      </div>
+    </div>
+
+    <div class="obj-card" data-cat="finance" data-id="obj_finance">
+      <div class="obj-header">
+        <div class="obj-icon" onclick="toggleObj(this.closest('.obj-card'))">💰</div>
+        <div class="obj-info" onclick="toggleObj(this.closest('.obj-card'))">
+          <div class="obj-name">Finanzas Personales</div>
+          <div class="obj-meta">Orden y ahorro</div>
+        </div>
+        <div class="obj-pct">0%</div>
+        <div class="obj-actions">
+          <button class="icon-btn" onclick="editObjOpen(this.closest('.obj-card'))">✏️</button>
+          <button class="icon-btn del" onclick="deleteObj(this.closest('.obj-card'))">🗑️</button>
+        </div>
+        <div class="chevron" onclick="toggleObj(this.closest('.obj-card'))">▼</div>
+      </div>
+      <div class="obj-bar"><div class="obj-bar-fill"></div></div>
+      <div class="tasks">
+        <div class="task" data-id="t9"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Armar presupuesto mensual personal</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
+        <div class="task" data-id="t10"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Separar gastos personales de la ferretería</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
+        <div class="task" data-id="t11"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Establecer un fondo de ahorro mensual</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
+        <div class="add-task"><input type="text" placeholder="Agregar tarea..." onkeydown="addTask(event,this)"><button onclick="addTask(null,this.previousElementSibling)">+</button></div>
+      </div>
+    </div>
+
+    <div class="obj-card" data-cat="family" data-id="obj_family">
+      <div class="obj-header">
+        <div class="obj-icon" onclick="toggleObj(this.closest('.obj-card'))">❤️</div>
+        <div class="obj-info" onclick="toggleObj(this.closest('.obj-card'))">
+          <div class="obj-name">Familia y Personal</div>
+          <div class="obj-meta">Bienestar y vínculos</div>
+        </div>
+        <div class="obj-pct">0%</div>
+        <div class="obj-actions">
+          <button class="icon-btn" onclick="editObjOpen(this.closest('.obj-card'))">✏️</button>
+          <button class="icon-btn del" onclick="deleteObj(this.closest('.obj-card'))">🗑️</button>
+        </div>
+        <div class="chevron" onclick="toggleObj(this.closest('.obj-card'))">▼</div>
+      </div>
+      <div class="obj-bar"><div class="obj-bar-fill"></div></div>
+      <div class="tasks">
+        <div class="task" data-id="t12"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Tiempo de calidad con familia cada semana</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
+        <div class="task" data-id="t13"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Planificar una salida o viaje</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
+        <div class="task" data-id="t14"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Aprender algo nuevo este mes</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
+        <div class="add-task"><input type="text" placeholder="Agregar tarea..." onkeydown="addTask(event,this)"><button onclick="addTask(null,this.previousElementSibling)">+</button></div>
+      </div>
+    </div>
+
+  </div>
+  <div class="bottom-btns">
+    <button class="btn-primary" onclick="openObjModal()">＋ Nuevo Objetivo</button>
+    <button class="btn-secondary" onclick="resetAll()">↺ Reiniciar</button>
+  </div>
+</div>
+
+<!-- PAGE: RECURRING -->
+<div class="page" id="page-recurring">
+  <div class="rec-header" style="margin-top:.8rem">
+    <div class="rec-title">Rutinas Diarias</div>
+    <div class="rec-date" id="rec-date-label"></div>
+  </div>
+  <div class="streak-box">
+    <div class="streak-fire">🔥</div>
+    <div>
+      <div class="streak-num" id="streak-num">0</div>
+      <div class="streak-label">días seguidos completos</div>
+    </div>
+  </div>
+  <div class="rec-progress">
+    <div class="rec-progress-top">
+      <span class="rec-progress-label">Hoy completado</span>
+      <span class="rec-progress-count" id="rec-count">0 / 0</span>
+    </div>
+    <div class="big-bar"><div class="big-bar-fill" id="rec-bar" style="background:var(--recurring)"></div></div>
+  </div>
+  <div class="rec-list" id="rec-list">
+    <div class="rec-item" data-id="r1">
+      <div class="rec-icon">💧</div>
+      <div class="rec-label">Tomar 8 vasos de agua</div>
+      <div class="rec-actions">
+        <button class="icon-btn" onclick="editRecOpen(this.closest('.rec-item'))">✏️</button>
+        <button class="icon-btn del" onclick="deleteRec(this.closest('.rec-item'))">🗑️</button>
+      </div>
+      <div class="rec-check" onclick="toggleRec(this.parentElement)"></div>
+    </div>
+    <div class="rec-item" data-id="r2">
+      <div class="rec-icon">🏃</div>
+      <div class="rec-label">Hacer ejercicio o caminar</div>
+      <div class="rec-actions">
+        <button class="icon-btn" onclick="editRecOpen(this.closest('.rec-item'))">✏️</button>
+        <button class="icon-btn del" onclick="deleteRec(this.closest('.rec-item'))">🗑️</button>
+      </div>
+      <div class="rec-check" onclick="toggleRec(this.parentElement)"></div>
+    </div>
+    <div class="rec-item" data-id="r3">
+      <div class="rec-icon">📱</div>
+      <div class="rec-label">Revisar mensajes de la ferretería</div>
+      <div class="rec-actions">
+        <button class="icon-btn" onclick="editRecOpen(this.closest('.rec-item'))">✏️</button>
+        <button class="icon-btn del" onclick="deleteRec(this.closest('.rec-item'))">🗑️</button>
+      </div>
+      <div class="rec-check" onclick="toggleRec(this.parentElement)"></div>
+    </div>
+    <div class="rec-item" data-id="r4">
+      <div class="rec-icon">📒</div>
+      <div class="rec-label">Anotar 1 tarea pendiente del día</div>
+      <div class="rec-actions">
+        <button class="icon-btn" onclick="editRecOpen(this.closest('.rec-item'))">✏️</button>
+        <button class="icon-btn del" onclick="deleteRec(this.closest('.rec-item'))">🗑️</button>
+      </div>
+      <div class="rec-check" onclick="toggleRec(this.parentElement)"></div>
+    </div>
+  </div>
+  <div class="bottom-btns">
+    <button class="btn-primary" style="background:var(--recurring)" onclick="openRecModal()">＋ Nueva Rutina</button>
+    <button class="btn-secondary" onclick="resetRecToday()">↺ Reiniciar hoy</button>
+  </div>
+</div>
+
+<!-- PAGE: CALENDAR -->
+<div class="page" id="page-calendar">
+  <div class="cal-nav" style="margin-top:.8rem">
+    <button class="cal-btn" onclick="changeMonth(-1)">◀</button>
+    <div class="cal-month" id="cal-month-label"></div>
+    <button class="cal-btn" onclick="changeMonth(1)">▶</button>
+  </div>
+  <div class="cal-grid" id="cal-grid"></div>
+  <div class="cal-legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--finance)"></div> Día completo</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--health)"></div> Tarea objetivo</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--recurring)"></div> Rutina diaria</div>
+  </div>
+  <div class="day-detail" id="day-detail">
+    <div class="day-detail-title">Tocá un día para ver detalle</div>
+  </div>
+</div>
+
+<!-- MODAL: NUEVO/EDITAR OBJETIVO -->
+<div class="modal-overlay" id="obj-modal-overlay" onclick="closeObjModal()"></div>
+<div class="modal" id="obj-modal">
+  <div class="modal-title" id="obj-modal-title">Nuevo Objetivo</div>
+  <input type="hidden" id="edit-obj-id">
+  <div class="form-group">
+    <label class="form-label">Nombre</label>
+    <input class="form-input" id="new-obj-name" type="text" placeholder="Ej: Aprender inglés">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Descripción (opcional)</label>
+    <input class="form-input" id="new-obj-desc" type="text" placeholder="Ej: Nivel básico en 6 meses">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Ícono</label>
+    <div class="emoji-row" id="obj-emoji-picker">
+      <span class="emoji-opt selected" onclick="selEmoji(this,'obj')">⭐</span>
+      <span class="emoji-opt" onclick="selEmoji(this,'obj')">🎯</span>
+      <span class="emoji-opt" onclick="selEmoji(this,'obj')">📚</span>
+      <span class="emoji-opt" onclick="selEmoji(this,'obj')">🚀</span>
+      <span class="emoji-opt" onclick="selEmoji(this,'obj')">🏆</span>
+      <span class="emoji-opt" onclick="selEmoji(this,'obj')">🧠</span>
+      <span class="emoji-opt" onclick="selEmoji(this,'obj')">🌱</span>
+      <span class="emoji-opt" onclick="selEmoji(this,'obj')">🔑</span>
+      <span class="emoji-opt" onclick="selEmoji(this,'obj')">💼</span>
+      <span class="emoji-opt" onclick="selEmoji(this,'obj')">💪</span>
+      <span class="emoji-opt" onclick="selEmoji(this,'obj')">💰</span>
+      <span class="emoji-opt" onclick="selEmoji(this,'obj')">❤️</span>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Color</label>
+    <div class="color-row" id="obj-color-picker">
+      <span class="color-opt selected" data-color="#e05c2a" style="background:#e05c2a" onclick="selColor(this)"></span>
+      <span class="color-opt" data-color="#2ecc71" style="background:#2ecc71" onclick="selColor(this)"></span>
+      <span class="color-opt" data-color="#f5a623" style="background:#f5a623" onclick="selColor(this)"></span>
+      <span class="color-opt" data-color="#a78bfa" style="background:#a78bfa" onclick="selColor(this)"></span>
+      <span class="color-opt" data-color="#38bdf8" style="background:#38bdf8" onclick="selColor(this)"></span>
+      <span class="color-opt" data-color="#f472b6" style="background:#f472b6" onclick="selColor(this)"></span>
+    </div>
+  </div>
+  <button class="modal-btn" id="obj-modal-save" onclick="saveObj()">CREAR OBJETIVO</button>
+</div>
+
+<!-- MODAL: EDITAR TAREA -->
+<div class="modal-overlay" id="task-modal-overlay" onclick="closeTaskModal()"></div>
+<div class="modal" id="task-modal">
+  <div class="modal-title">Editar Tarea</div>
+  <div class="form-group">
+    <label class="form-label">Texto de la tarea</label>
+    <input class="form-input" id="edit-task-text" type="text">
+  </div>
+  <div class="modal-btn-row">
+    <button class="modal-btn" onclick="saveTask()">GUARDAR</button>
+    <button class="modal-btn modal-btn-danger" onclick="deleteTaskFromModal()">ELIMINAR</button>
+  </div>
+</div>
+
+<!-- MODAL: NUEVA/EDITAR RUTINA -->
+<div class="modal-overlay" id="rec-modal-overlay" onclick="closeRecModal()"></div>
+<div class="modal" id="rec-modal">
+  <div class="modal-title" id="rec-modal-title">Nueva Rutina</div>
+  <input type="hidden" id="edit-rec-id">
+  <div class="form-group">
+    <label class="form-label">Nombre de la rutina</label>
+    <input class="form-input" id="new-rec-name" type="text" placeholder="Ej: Meditar 10 minutos">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Ícono</label>
+    <div class="emoji-row" id="rec-emoji-picker">
+      <span class="emoji-opt selected" onclick="selRecEmoji(this)">⚡</span>
+      <span class="emoji-opt" onclick="selRecEmoji(this)">🧘</span>
+      <span class="emoji-opt" onclick="selRecEmoji(this)">📖</span>
+      <span class="emoji-opt" onclick="selRecEmoji(this)">🥗</span>
+      <span class="emoji-opt" onclick="selRecEmoji(this)">💊</span>
+      <span class="emoji-opt" onclick="selRecEmoji(this)">✍️</span>
+      <span class="emoji-opt" onclick="selRecEmoji(this)">🎵</span>
+      <span class="emoji-opt" onclick="selRecEmoji(this)">🌙</span>
+      <span class="emoji-opt" onclick="selRecEmoji(this)">💧</span>
+      <span class="emoji-opt" onclick="selRecEmoji(this)">🏃</span>
+      <span class="emoji-opt" onclick="selRecEmoji(this)">📱</span>
+      <span class="emoji-opt" onclick="selRecEmoji(this)">📒</span>
+    </div>
+  </div>
+  <div class="modal-btn-row" id="rec-modal-btns">
+    <button class="modal-btn" style="background:var(--recurring)" onclick="saveRec()">GUARDAR RUTINA</button>
+  </div>
+</div>
+
+<script>
+  let taskCounter=100, objCounter=200, recCounter=300;
+  let selObjEmoji='⭐', selObjColor='#e05c2a', selRecEmojiVal='⚡';
+  let editingTaskEl=null, editingRecEl=null;
+  let calYear, calMonth;
+  const today=new Date(), todayStr=dateStr(today);
+
+  function dateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
+  // PAGES
+  function showPage(name){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('page-'+name).classList.add('active');
+    document.querySelectorAll('.nav-tab')[{objectives:0,recurring:1,calendar:2}[name]].classList.add('active');
+    if(name==='calendar') renderCalendar();
+  }
+
+  // ===================== OBJECTIVES =====================
+  function toggleTask(el){
+    el.classList.toggle('done');
+    if(el.classList.contains('done')) logCalEvent(todayStr,'obj',el.querySelector('.task-text').textContent);
+    updateAll(); save();
+  }
+
+  function toggleObj(card){
+    card.classList.toggle('open');
+    card.querySelector('.tasks').classList.toggle('open');
+    save();
+  }
+
+  function addTask(event,input){
+    if(event&&event.key!=='Enter') return;
+    const text=input.value.trim();
+    if(!text) return;
+    const tasksDiv=input.closest('.tasks');
+    const addRow=input.closest('.add-task');
+    tasksDiv.insertBefore(createTaskEl(text),addRow);
+    input.value='';
+    updateAll(); save();
+  }
+
+  function createTaskEl(text,id,done){
+    const div=document.createElement('div');
+    div.className='task'+(done?' done':'');
+    div.dataset.id=id||('c'+taskCounter++);
+    div.dataset.custom='true';
+    div.innerHTML=`<div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">${text}</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div>`;
+    return div;
+  }
+
+  function deleteTask(el){
+    if(confirm('¿Eliminar esta tarea?')){ el.remove(); updateAll(); save(); }
+  }
+
+  function editTaskOpen(el){
+    editingTaskEl=el;
+    document.getElementById('edit-task-text').value=el.querySelector('.task-text').textContent;
+    document.getElementById('task-modal-overlay').style.display='block';
+    document.getElementById('task-modal').style.display='block';
+    setTimeout(()=>document.getElementById('edit-task-text').focus(),100);
+  }
+
+  function saveTask(){
+    const val=document.getElementById('edit-task-text').value.trim();
+    if(!val) return;
+    editingTaskEl.querySelector('.task-text').textContent=val;
+    closeTaskModal();
+    updateAll(); save();
+  }
+
+  function deleteTaskFromModal(){
+    if(confirm('¿Eliminar esta tarea?')){ editingTaskEl.remove(); closeTaskModal(); updateAll(); save(); }
+  }
+
+  function closeTaskModal(){
+    document.getElementById('task-modal-overlay').style.display='none';
+    document.getElementById('task-modal').style.display='none';
+    editingTaskEl=null;
+  }
+
+  function deleteObj(card){
+    if(confirm('¿Eliminar este objetivo y todas sus tareas?')){ card.remove(); updateAll(); save(); }
+  }
+
+  function editObjOpen(card){
+    document.getElementById('edit-obj-id').value=card.dataset.id;
+    document.getElementById('obj-modal-title').textContent='Editar Objetivo';
+    document.getElementById('obj-modal-save').textContent='GUARDAR CAMBIOS';
+    document.getElementById('new-obj-name').value=card.querySelector('.obj-name').textContent;
+    document.getElementById('new-obj-desc').value=card.querySelector('.obj-meta').textContent;
+    // set emoji
+    const icon=card.querySelector('.obj-icon').textContent;
+    selObjEmoji=icon;
+    document.querySelectorAll('#obj-emoji-picker .emoji-opt').forEach(e=>{
+      e.classList.toggle('selected',e.textContent===icon);
+    });
+    // set color
+    const color=card.style.borderLeftColor;
+    selObjColor=color;
+    document.querySelectorAll('#obj-color-picker .color-opt').forEach(e=>{
+      const ec=e.dataset.color;
+      // compare loosely
+      e.classList.remove('selected');
+    });
+    openObjModal();
+  }
+
+  function openObjModal(){
+    const isEdit=document.getElementById('edit-obj-id').value;
+    if(!isEdit){
+      document.getElementById('obj-modal-title').textContent='Nuevo Objetivo';
+      document.getElementById('obj-modal-save').textContent='CREAR OBJETIVO';
+      document.getElementById('new-obj-name').value='';
+      document.getElementById('new-obj-desc').value='';
+      selObjEmoji='⭐'; selObjColor='#e05c2a';
+      document.querySelectorAll('#obj-emoji-picker .emoji-opt').forEach((e,i)=>e.classList.toggle('selected',i===0));
+      document.querySelectorAll('#obj-color-picker .color-opt').forEach((e,i)=>e.classList.toggle('selected',i===0));
+    }
+    document.getElementById('obj-modal-overlay').style.display='block';
+    document.getElementById('obj-modal').style.display='block';
+    setTimeout(()=>document.getElementById('new-obj-name').focus(),100);
+  }
+
+  function closeObjModal(){
+    document.getElementById('obj-modal-overlay').style.display='none';
+    document.getElementById('obj-modal').style.display='none';
+    document.getElementById('edit-obj-id').value='';
+  }
+
+  function saveObj(){
+    const name=document.getElementById('new-obj-name').value.trim();
+    if(!name) return;
+    const desc=document.getElementById('new-obj-desc').value.trim();
+    const editId=document.getElementById('edit-obj-id').value;
+
+    if(editId){
+      // EDIT existing
+      const card=document.querySelector(`.obj-card[data-id="${editId}"]`);
+      if(card){
+        card.querySelector('.obj-icon').textContent=selObjEmoji;
+        card.querySelector('.obj-name').textContent=name;
+        card.querySelector('.obj-meta').textContent=desc||card.querySelector('.obj-meta').textContent;
+        card.style.borderLeftColor=selObjColor;
+        const fill=card.querySelector('.obj-bar-fill');
+        if(card.dataset.custom) fill.style.background=selObjColor;
+        const pctEl=card.querySelector('.obj-pct');
+        pctEl.style.color=selObjColor;
+      }
+    } else {
+      // CREATE new
+      const id='obj_custom_'+objCounter++;
+      document.getElementById('objectives').appendChild(buildObjCard(id,name,desc,selObjEmoji,selObjColor,[],true));
+    }
+    closeObjModal();
+    updateAll(); saveCustomObjectives();
+  }
+
+  function buildObjCard(id,name,desc,icon,color,tasks,isNew){
+    const card=document.createElement('div');
+    card.className='obj-card'+(isNew?' open':'');
+    card.dataset.cat='custom';
+    card.dataset.id=id;
+    card.dataset.custom='true';
+    card.style.borderLeftColor=color;
+    card.innerHTML=`
+      <div class="obj-header">
+        <div class="obj-icon" onclick="toggleObj(this.closest('.obj-card'))">${icon}</div>
+        <div class="obj-info" onclick="toggleObj(this.closest('.obj-card'))">
+          <div class="obj-name">${name}</div>
+          <div class="obj-meta">${desc||'Objetivo personalizado'}</div>
+        </div>
+        <div class="obj-pct" style="color:${color}">0%</div>
+        <div class="obj-actions">
+          <button class="icon-btn" onclick="editObjOpen(this.closest('.obj-card'))">✏️</button>
+          <button class="icon-btn del" onclick="deleteObj(this.closest('.obj-card'))">🗑️</button>
+        </div>
+        <div class="chevron" onclick="toggleObj(this.closest('.obj-card'))">▼</div>
+      </div>
+      <div class="obj-bar"><div class="obj-bar-fill" style="background:${color}"></div></div>
+      <div class="tasks ${isNew?'open':''}">
+        ${tasks.map(t=>`<div class="task${t.done?' done':''}" data-id="${t.id}" data-custom="true">
+          <div class="task-check" onclick="toggleTask(this.parentElement)"></div>
+          <div class="task-text" onclick="toggleTask(this.parentElement)">${t.text}</div>
+          <div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div>
+        </div>`).join('')}
+        <div class="add-task"><input type="text" placeholder="Agregar tarea..." onkeydown="addTask(event,this)"><button onclick="addTask(null,this.previousElementSibling)">+</button></div>
+      </div>`;
+    return card;
+  }
+
+  function selEmoji(el,type){
+    document.querySelectorAll('#obj-emoji-picker .emoji-opt').forEach(e=>e.classList.remove('selected'));
+    el.classList.add('selected');
+    selObjEmoji=el.textContent;
+  }
+  function selColor(el){
+    document.querySelectorAll('#obj-color-picker .color-opt').forEach(e=>e.classList.remove('selected'));
+    el.classList.add('selected');
+    selObjColor=el.dataset.color;
+  }
+
+  function filterCat(cat){
+    document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelector(`.cat-tab[data-cat="${cat}"]`).classList.add('active');
+    document.querySelectorAll('.obj-card').forEach(c=>c.classList.toggle('hidden',cat!=='all'&&c.dataset.cat!==cat));
+  }
+
+  function updateAll(){
+    let totalDone=0,totalTasks=0;
+    document.querySelectorAll('.obj-card').forEach(card=>{
+      const tasks=card.querySelectorAll('.task');
+      const done=card.querySelectorAll('.task.done').length;
+      const total=tasks.length;
+      const pct=total>0?Math.round(done/total*100):0;
+      card.querySelector('.obj-pct').textContent=pct+'%';
+      const fill=card.querySelector('.obj-bar-fill');
+      fill.style.width=pct+'%';
+      if(card.dataset.custom) fill.style.background=card.style.borderLeftColor;
+      totalDone+=done; totalTasks+=total;
+    });
+    const overall=totalTasks>0?Math.round(totalDone/totalTasks*100):0;
+    document.getElementById('overall-pct').textContent=overall+'%';
+    document.getElementById('overall-bar').style.width=overall+'%';
+  }
+
+  // ===================== RECURRING =====================
+  function toggleRec(el){
+    el.classList.toggle('done');
+    if(el.classList.contains('done')) logCalEvent(todayStr,'rec',el.querySelector('.rec-label').textContent);
+    saveRec(); updateRec(); checkRecStreak();
+  }
+
+  function updateRec(){
+    const items=document.querySelectorAll('.rec-item');
+    const done=document.querySelectorAll('.rec-item.done').length;
+    const total=items.length;
+    document.getElementById('rec-count').textContent=done+' / '+total;
+    document.getElementById('rec-bar').style.width=(total>0?Math.round(done/total*100):0)+'%';
+  }
+
+  function deleteRec(el){
+    if(confirm('¿Eliminar esta rutina?')){ el.remove(); saveRec(); updateRec(); }
+  }
+
+  function editRecOpen(el){
+    editingRecEl=el;
+    document.getElementById('edit-rec-id').value=el.dataset.id;
+    document.getElementById('rec-modal-title').textContent='Editar Rutina';
+    document.getElementById('new-rec-name').value=el.querySelector('.rec-label').textContent;
+    const icon=el.querySelector('.rec-icon').textContent;
+    selRecEmojiVal=icon;
+    document.querySelectorAll('#rec-emoji-picker .emoji-opt').forEach(e=>e.classList.toggle('selected',e.textContent===icon));
+    document.getElementById('rec-modal-btns').innerHTML=`
+      <button class="modal-btn" style="background:var(--recurring)" onclick="saveRec()">GUARDAR</button>
+      <button class="modal-btn modal-btn-danger" onclick="deleteRecFromModal()">ELIMINAR</button>`;
+    document.getElementById('rec-modal-overlay').style.display='block';
+    document.getElementById('rec-modal').style.display='block';
+    setTimeout(()=>document.getElementById('new-rec-name').focus(),100);
+  }
+
+  function openRecModal(){
+    editingRecEl=null;
+    document.getElementById('edit-rec-id').value='';
+    document.getElementById('rec-modal-title').textContent='Nueva Rutina';
+    document.getElementById('new-rec-name').value='';
+    selRecEmojiVal='⚡';
+    document.querySelectorAll('#rec-emoji-picker .emoji-opt').forEach((e,i)=>e.classList.toggle('selected',i===0));
+    document.getElementById('rec-modal-btns').innerHTML=`<button class="modal-btn" style="background:var(--recurring)" onclick="saveRec()">AGREGAR RUTINA</button>`;
+    document.getElementById('rec-modal-overlay').style.display='block';
+    document.getElementById('rec-modal').style.display='block';
+    setTimeout(()=>document.getElementById('new-rec-name').focus(),100);
+  }
+
+  function closeRecModal(){
+    document.getElementById('rec-modal-overlay').style.display='none';
+    document.getElementById('rec-modal').style.display='none';
+    editingRecEl=null;
+  }
+
+  function selRecEmoji(el){
+    document.querySelectorAll('#rec-emoji-picker .emoji-opt').forEach(e=>e.classList.remove('selected'));
+    el.classList.add('selected');
+    selRecEmojiVal=el.textContent;
+  }
+
+  function saveRec(){
+    const name=document.getElementById('new-rec-name').value.trim();
+    if(!name) return;
+    if(editingRecEl){
+      editingRecEl.querySelector('.rec-label').textContent=name;
+      editingRecEl.querySelector('.rec-icon').textContent=selRecEmojiVal;
+    } else {
+      const id='r_custom_'+recCounter++;
+      const el=document.createElement('div');
+      el.className='rec-item';
+      el.dataset.id=id;
+      el.dataset.custom='true';
+      el.innerHTML=`<div class="rec-icon">${selRecEmojiVal}</div><div class="rec-label">${name}</div><div class="rec-actions"><button class="icon-btn" onclick="editRecOpen(this.closest('.rec-item'))">✏️</button><button class="icon-btn del" onclick="deleteRec(this.closest('.rec-item'))">🗑️</button></div><div class="rec-check" onclick="toggleRec(this.parentElement)"></div>`;
+      document.getElementById('rec-list').appendChild(el);
+    }
+    closeRecModal();
+    persistRec(); updateRec();
+  }
+
+  function deleteRecFromModal(){
+    if(confirm('¿Eliminar esta rutina?')){
+      editingRecEl.remove();
+      closeRecModal();
+      persistRec(); updateRec();
+    }
+  }
+
+  function persistRec(){
+    const customs=[...document.querySelectorAll('.rec-item')].map(i=>({
+      id:i.dataset.id,
+      icon:i.querySelector('.rec-icon').textContent,
+      label:i.querySelector('.rec-label').textContent,
+      custom:!!i.dataset.custom
+    }));
+    localStorage.setItem('mis_rec_items',JSON.stringify(customs));
+  }
+
+  function checkRecStreak(){
+    const data=JSON.parse(localStorage.getItem('mis_rec_history')||'{}');
+    const items=document.querySelectorAll('.rec-item');
+    const done=document.querySelectorAll('.rec-item.done').length;
+    if(done===items.length&&items.length>0){
+      data[todayStr]=true;
+      localStorage.setItem('mis_rec_history',JSON.stringify(data));
+      logCalEvent(todayStr,'full','Todas las rutinas completadas');
+    }
+    let streak=0;
+    const d=new Date(today);
+    while(true){const s=dateStr(d);if(data[s]){streak++;d.setDate(d.getDate()-1);}else break;}
+    document.getElementById('streak-num').textContent=streak;
+  }
+
+  function resetRecToday(){
+    document.querySelectorAll('.rec-item').forEach(i=>i.classList.remove('done'));
+    localStorage.removeItem('mis_rec_done');
+    updateRec();
+  }
+
+  function checkDayReset(){
+    const lastDay=localStorage.getItem('mis_rec_lastday');
+    if(lastDay&&lastDay!==todayStr){
+      document.querySelectorAll('.rec-item').forEach(i=>i.classList.remove('done'));
+      localStorage.removeItem('mis_rec_done');
+    }
+    localStorage.setItem('mis_rec_lastday',todayStr);
+  }
+
+  // ===================== CALENDAR =====================
+  function logCalEvent(dateS,type,desc){
+    const data=JSON.parse(localStorage.getItem('mis_cal_events')||'{}');
+    if(!data[dateS]) data[dateS]=[];
+    if(!data[dateS].find(e=>e.type===type&&e.desc===desc)) data[dateS].push({type,desc});
+    localStorage.setItem('mis_cal_events',JSON.stringify(data));
+    if(document.getElementById('page-calendar').classList.contains('active')) renderCalendar();
+  }
+
+  function renderCalendar(){
+    const events=JSON.parse(localStorage.getItem('mis_cal_events')||'{}');
+    const recHistory=JSON.parse(localStorage.getItem('mis_rec_history')||'{}');
+    const labels=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    document.getElementById('cal-month-label').textContent=labels[calMonth]+' '+calYear;
+    const grid=document.getElementById('cal-grid');
+    grid.innerHTML='';
+    ['Do','Lu','Ma','Mi','Ju','Vi','Sa'].forEach(d=>{
+      const el=document.createElement('div');el.className='cal-dow';el.textContent=d;grid.appendChild(el);
+    });
+    const firstDay=new Date(calYear,calMonth,1).getDay();
+    const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+    for(let i=0;i<firstDay;i++){const el=document.createElement('div');el.className='cal-day empty';grid.appendChild(el);}
+    for(let d=1;d<=daysInMonth;d++){
+      const ds=calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+      const el=document.createElement('div');
+      el.className='cal-day'+(ds===todayStr?' today':'');
+      const evts=events[ds]||[];
+      const hasRec=evts.some(e=>e.type==='rec')||recHistory[ds];
+      const hasObj=evts.some(e=>e.type==='obj');
+      const isFull=recHistory[ds];
+      el.innerHTML=`<div class="day-num">${d}</div><div class="dots">
+        ${isFull?'<div class="dot full"></div>':''}
+        ${hasObj?'<div class="dot obj"></div>':''}
+        ${hasRec&&!isFull?'<div class="dot rec"></div>':''}
+      </div>`;
+      el.onclick=()=>showDayDetail(ds,evts,recHistory[ds]);
+      grid.appendChild(el);
+    }
+  }
+
+  function showDayDetail(ds,evts,recComplete){
+    const det=document.getElementById('day-detail');
+    const p=ds.split('-');
+    let html=`<div class="day-detail-title">${p[2]}/${p[1]}/${p[0]}</div>`;
+    if(!evts.length&&!recComplete) html+=`<div class="detail-item" style="color:var(--muted)">Sin actividad registrada</div>`;
+    else{
+      if(recComplete) html+=`<div class="detail-item">🔥 <span>Todas las rutinas completadas</span></div>`;
+      evts.forEach(e=>{
+        const icon=e.type==='obj'?'✅':e.type==='rec'?'🔄':'⭐';
+        html+=`<div class="detail-item">${icon} <span>${e.desc}</span></div>`;
+      });
+    }
+    det.innerHTML=html;
+  }
+
+  function changeMonth(dir){
+    calMonth+=dir;
+    if(calMonth>11){calMonth=0;calYear++;}
+    if(calMonth<0){calMonth=11;calYear--;}
+    renderCalendar();
+  }
+
+  // ===================== SAVE/LOAD =====================
+  function save(){
+    const state={};
+    document.querySelectorAll('.task').forEach(t=>{state['task_'+t.dataset.id]=t.classList.contains('done');});
+    document.querySelectorAll('.obj-card:not([data-custom])').forEach(card=>{
+      const customTasks=[...card.querySelectorAll('.task[data-custom="true"]')].map(t=>({
+        id:t.dataset.id,text:t.querySelector('.task-text').textContent,done:t.classList.contains('done')
+      }));
+      state['custom_'+card.dataset.id]=JSON.stringify(customTasks);
+      state['open_'+card.dataset.id]=card.classList.contains('open');
+    });
+    localStorage.setItem('mis_objetivos',JSON.stringify(state));
+    saveCustomObjectives();
+  }
+
+  function saveCustomObjectives(){
+    const customs=[...document.querySelectorAll('.obj-card[data-custom="true"]')].map(card=>({
+      id:card.dataset.id,
+      name:card.querySelector('.obj-name').textContent,
+      desc:card.querySelector('.obj-meta').textContent,
+      icon:card.querySelector('.obj-icon').textContent,
+      color:card.style.borderLeftColor,
+      open:card.classList.contains('open'),
+      tasks:[...card.querySelectorAll('.task')].map(t=>({
+        id:t.dataset.id,text:t.querySelector('.task-text').textContent,done:t.classList.contains('done')
+      }))
+    }));
+    localStorage.setItem('mis_objetivos_custom',JSON.stringify(customs));
+  }
+
+  function load(){
+    // Standard objectives
+    const saved=localStorage.getItem('mis_objetivos');
+    if(saved){
+      const state=JSON.parse(saved);
+      document.querySelectorAll('.obj-card:not([data-custom])').forEach(card=>{
+        const ct=state['custom_'+card.dataset.id];
+        if(ct){
+          const customTasks=JSON.parse(ct);
+          const tasksDiv=card.querySelector('.tasks');
+          const addRow=tasksDiv.querySelector('.add-task');
+          customTasks.forEach(c=>{
+            const el=createTaskEl(c.text,c.id,c.done);
+            tasksDiv.insertBefore(el,addRow);
+          });
+        }
+        if(state['open_'+card.dataset.id]){card.classList.add('open');card.querySelector('.tasks').classList.add('open');}
+      });
+      document.querySelectorAll('.task').forEach(t=>{if(state['task_'+t.dataset.id]) t.classList.add('done');});
+    }
+
+    // Custom objectives
+    const customObjs=localStorage.getItem('mis_objetivos_custom');
+    if(customObjs){
+      JSON.parse(customObjs).forEach(obj=>{
+        const card=buildObjCard(obj.id,obj.name,obj.desc,obj.icon,obj.color,obj.tasks,false);
+        if(obj.open){card.classList.add('open');card.querySelector('.tasks').classList.add('open');}
+        document.getElementById('objectives').appendChild(card);
+      });
+    }
+
+    // Recurring items
+    const recItems=localStorage.getItem('mis_rec_items');
+    if(recItems){
+      const list=document.getElementById('rec-list');
+      // Replace all items with saved ones
+      list.innerHTML='';
+      JSON.parse(recItems).forEach(r=>{
+        const el=document.createElement('div');
+        el.className='rec-item';
+        el.dataset.id=r.id;
+        if(r.custom) el.dataset.custom='true';
+        el.innerHTML=`<div class="rec-icon">${r.icon}</div><div class="rec-label">${r.label}</div><div class="rec-actions"><button class="icon-btn" onclick="editRecOpen(this.closest('.rec-item'))">✏️</button><button class="icon-btn del" onclick="deleteRec(this.closest('.rec-item'))">🗑️</button></div><div class="rec-check" onclick="toggleRec(this.parentElement)"></div>`;
+        list.appendChild(el);
+      });
+    }
+
+    // Recurring done state
+    const lastDay=localStorage.getItem('mis_rec_lastday');
+    if(lastDay===todayStr){
+      const recDone=JSON.parse(localStorage.getItem('mis_rec_done')||'[]');
+      recDone.forEach(id=>{
+        const el=document.querySelector(`.rec-item[data-id="${id}"]`);
+        if(el) el.classList.add('done');
+      });
+    }
+
+    updateAll(); updateRec(); checkRecStreak();
+  }
+
+  function saveRecDone(){
+    const done=[...document.querySelectorAll('.rec-item.done')].map(i=>i.dataset.id);
+    localStorage.setItem('mis_rec_done',JSON.stringify(done));
+  }
+
+  // Patch toggleRec to also save done state
+  const _origToggleRec=toggleRec;
+
+  function resetAll(){
+    if(!confirm('¿Reiniciar TODO? Se borrará el progreso y los items personalizados.')) return;
+    ['mis_objetivos','mis_objetivos_custom','mis_rec_items','mis_rec_done','mis_rec_lastday','mis_rec_history','mis_cal_events'].forEach(k=>localStorage.removeItem(k));
+    location.reload();
+  }
+
+  // Override saveRec in toggleRec context to also persist done
+  function toggleRec(el){
+    el.classList.toggle('done');
+    if(el.classList.contains('done')) logCalEvent(todayStr,'rec',el.querySelector('.rec-label').textContent);
+    saveRecDone(); updateRec(); checkRecStreak();
+  }
+
+  // INIT
+  window.addEventListener('load',()=>{
+    calYear=today.getFullYear(); calMonth=today.getMonth();
+    const months=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    const days=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+    document.getElementById('today-label').textContent=days[today.getDay()]+' '+today.getDate()+' '+months[today.getMonth()];
+    document.getElementById('rec-date-label').textContent=days[today.getDay()]+' '+today.getDate()+'/'+(today.getMonth()+1)+'/'+today.getFullYear();
+    checkDayReset();
+    load();
+  });
+</script>
+</body>
+</html>
