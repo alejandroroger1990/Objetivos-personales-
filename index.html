@@ -3,7 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#111318">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Mis Objetivos</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -83,6 +89,33 @@
 
   .tasks{max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s;padding:0 .6rem;}
   .tasks.open{max-height:2000px;padding:.7rem .6rem .7rem;}
+  .challenge-note{font-size:.7rem;color:var(--recurring);margin-top:.2rem;font-weight:700;}
+  .obj-routines{display:flex;flex-direction:column;gap:.45rem;margin:.7rem .6rem 0;}
+  .obj-routine{background:rgba(56,189,248,.09);border:1px solid rgba(56,189,248,.28);border-radius:10px;padding:.7rem .85rem;display:flex;align-items:center;gap:.7rem;}
+  .obj-routine.done{background:rgba(46,204,113,.1);border-color:rgba(46,204,113,.3);}
+  .obj-routine-check{width:22px;height:22px;border:2px solid var(--recurring);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;color:white;font-size:.75rem;font-weight:700;}
+  .obj-routine.done .obj-routine-check{background:var(--health);border-color:var(--health);}
+  .obj-routine.done .obj-routine-check::after{content:'✓';}
+  .obj-routine-text{flex:1;min-width:0;}
+  .obj-routine-label{font-size:.84rem;font-weight:700;}
+  .obj-routine-meta{font-size:.7rem;color:var(--muted);margin-top:.1rem;}
+  .obj-routine-actions{display:flex;gap:.25rem;flex-shrink:0;}
+  .routine-editor{display:flex;gap:.45rem;margin-bottom:.5rem;align-items:center;}
+  .routine-editor input{min-width:0;}
+  .routine-editor .routine-name{flex:1.4;}
+  .routine-editor .routine-purpose{flex:1.2;}
+  .routine-editor .routine-time{flex:.8;}
+  .routine-editor .routine-target{flex:1.4;min-width:180px;}
+  .routine-editor .routine-repeat{width:120px;}
+  .routine-days{display:flex;gap:.2rem;flex-wrap:wrap;}
+  .routine-days label{font-size:.68rem;color:var(--muted);display:flex;gap:.15rem;align-items:center;background:var(--card2);padding:.2rem .35rem;border-radius:6px;}
+  .routine-created{font-size:.65rem;color:var(--muted);}
+  .routine-editor button{width:34px;height:34px;border:none;border-radius:8px;background:rgba(231,76,60,.18);color:var(--danger);cursor:pointer;font-size:1rem;}
+  .subtask-editor{display:flex;gap:.45rem;margin-bottom:.5rem;align-items:center;}
+  .subtask-editor .subtask-name{flex:1.4;min-width:0;}
+  .subtask-editor .subtask-purpose{flex:1.2;min-width:0;}
+  .subtask-editor .subtask-prio{width:76px;}
+  .subtask-editor button{width:34px;height:34px;border:none;border-radius:8px;background:rgba(231,76,60,.18);color:var(--danger);cursor:pointer;font-size:1rem;}
 
   /* TASK ROW */
   .task{background:var(--card2);border-radius:8px;padding:.65rem .9rem;display:flex;align-items:center;gap:.7rem;margin-bottom:.4rem;user-select:none;}
@@ -92,6 +125,23 @@
   .task.done .task-check::after{content:'✓';}
   .task.done .task-text{text-decoration:line-through;color:var(--muted);}
   .task-text{font-size:.85rem;line-height:1.4;flex:1;cursor:pointer;}
+  .task-body{flex:1;min-width:0;}
+  .task-progress{display:flex;align-items:center;gap:.5rem;margin-top:.35rem;}
+  .task-mini-bar{height:4px;background:var(--border);border-radius:4px;flex:1;overflow:hidden;}
+  .task-mini-fill{height:100%;background:var(--health);width:0%;transition:width .25s;}
+  .task-pct{font-size:.68rem;color:var(--muted);font-weight:700;}
+  .due-badge{display:inline-flex;align-items:center;gap:.25rem;margin-top:.25rem;padding:.15rem .45rem;border-radius:999px;background:rgba(245,166,35,.12);color:var(--finance);font-size:.68rem;font-weight:700;}
+  .due-badge.overdue{background:rgba(231,76,60,.16);color:var(--danger);}
+  .due-badge.done{background:rgba(46,204,113,.14);color:var(--health);}
+  .priority-badge{display:inline-flex;align-items:center;margin-top:.25rem;margin-right:.3rem;padding:.15rem .45rem;border-radius:999px;background:rgba(224,92,42,.14);color:var(--work);font-size:.68rem;font-weight:700;}
+  .plan-note{font-size:.72rem;color:var(--muted);margin-top:.3rem;line-height:1.35;}
+  .subtasks{margin-top:.45rem;display:flex;flex-direction:column;gap:.25rem;}
+  .subtask{display:flex;align-items:center;gap:.45rem;font-size:.76rem;color:var(--muted);}
+  .subtask.done .subtask-label{text-decoration:line-through;color:var(--muted);}
+  .subtask-check{width:16px;height:16px;border:1.5px solid var(--muted);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:.65rem;flex-shrink:0;}
+  .subtask.done .subtask-check{background:var(--health);border-color:var(--health);}
+  .subtask.done .subtask-check::after{content:'✓';}
+  .subtask-priority{font-size:.65rem;color:var(--work);font-weight:700;}
   .task-actions{display:flex;gap:.2rem;flex-shrink:0;}
 
   .add-task{display:flex;gap:.5rem;margin-top:.5rem;}
@@ -124,9 +174,25 @@
   .rec-item.done .rec-check{background:var(--recurring);border-color:var(--recurring);}
   .rec-item.done .rec-check::after{content:'✓';}
   .rec-item.done .rec-label{text-decoration:line-through;color:var(--muted);}
-  .rec-label{font-size:.9rem;flex:1;}
+  .rec-body{flex:1;min-width:0;}
+  .rec-label{font-size:.9rem;}
+  .rec-time{font-size:.7rem;color:var(--recurring);margin-top:.15rem;font-weight:700;}
   .rec-icon{font-size:1.2rem;flex-shrink:0;}
   .rec-actions{display:flex;gap:.2rem;flex-shrink:0;}
+
+  /* ALERTS */
+  .alerts{margin:1rem 1.2rem 0;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;}
+  .alerts.hidden{display:none;}
+  .alerts-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:1.5px;color:var(--finance);margin-bottom:.55rem;}
+  .alert-item{font-size:.82rem;color:var(--muted);padding:.35rem 0;border-top:1px solid var(--border);}
+  .alert-item:first-of-type{border-top:none;}
+  .alert-item span{color:var(--light);}
+  .notify-row{display:flex;gap:.7rem;align-items:center;margin-bottom:1rem;background:var(--card);border-radius:12px;padding:.8rem 1rem;}
+  .notify-row .btn-secondary{margin-left:auto;white-space:nowrap;}
+  .backup-panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-top:1rem;}
+  .backup-title{font-size:.85rem;font-weight:700;margin-bottom:.2rem;}
+  .backup-text{font-size:.72rem;color:var(--muted);line-height:1.35;margin-bottom:.75rem;}
+  .backup-actions{display:flex;gap:.5rem;flex-wrap:wrap;}
 
   /* CALENDAR */
   .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
@@ -139,18 +205,48 @@
   .cal-day.today{border:2px solid var(--finance);}
   .cal-day .day-num{font-size:.78rem;font-weight:600;line-height:1;}
   .cal-day .dots{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;max-width:28px;}
+  .cal-icons{display:flex;gap:1px;line-height:1;font-size:.72rem;max-width:32px;overflow:hidden;}
+  .cal-count{font-size:.56rem;color:var(--muted);line-height:1;max-width:100%;white-space:nowrap;}
   .dot{width:5px;height:5px;border-radius:50%;}
   .dot.rec{background:var(--recurring);}
   .dot.obj{background:var(--health);}
   .dot.full{background:var(--finance);}
+  .dot.due{background:var(--danger);}
+  .dot.alarm{background:var(--recurring);box-shadow:0 0 0 2px rgba(56,189,248,.18);}
+  .dot.income{background:var(--health);box-shadow:0 0 0 2px rgba(46,204,113,.16);}
+  .dot.expense{background:var(--danger);box-shadow:0 0 0 2px rgba(231,76,60,.16);}
   .cal-legend{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;background:var(--card);border-radius:10px;padding:.8rem 1rem;}
   .legend-item{display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--muted);}
   .legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
   .day-detail{background:var(--card);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1rem;min-height:80px;}
   .day-detail-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:1px;margin-bottom:.6rem;color:var(--finance);}
+  .detail-section{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-top:.7rem;padding-top:.55rem;border-top:1px solid var(--border);}
+  .detail-section:first-of-type{margin-top:0;border-top:none;padding-top:0;}
   .detail-item{font-size:.82rem;padding:.3rem 0;border-bottom:1px solid var(--border);color:var(--muted);}
   .detail-item:last-child{border-bottom:none;}
   .detail-item span{color:var(--light);}
+
+  /* MONEY */
+  .money-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin:1rem 0;}
+  .money-box{background:var(--card);border-radius:10px;padding:.8rem;text-align:center;}
+  .money-label{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
+  .money-value{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;margin-top:.2rem;}
+  .money-income{color:var(--health);}
+  .money-expense{color:var(--danger);}
+  .money-balance{color:var(--finance);}
+  .money-form{background:var(--card);border-radius:12px;padding:1rem;margin-bottom:1rem;}
+  .money-row{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;}
+  .money-list{display:flex;flex-direction:column;gap:.55rem;}
+  .money-item{background:var(--card);border-left:4px solid var(--health);border-radius:10px;padding:.75rem .9rem;display:flex;gap:.7rem;align-items:flex-start;}
+  .money-item.expense{border-left-color:var(--danger);}
+  .money-main{flex:1;min-width:0;}
+  .money-title{font-size:.9rem;font-weight:700;}
+  .money-meta{font-size:.72rem;color:var(--muted);margin-top:.15rem;line-height:1.35;}
+  .money-amount{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;white-space:nowrap;}
+  @media(max-width:520px){
+    .money-summary{grid-template-columns:1fr;}
+    .money-row{grid-template-columns:1fr;}
+  }
 
   /* MODALS */
   .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;}
@@ -183,7 +279,13 @@
     <div class="nav-tab active" onclick="showPage('objectives')">🎯 Objetivos</div>
     <div class="nav-tab" onclick="showPage('recurring')">🔄 Rutinas</div>
     <div class="nav-tab" onclick="showPage('calendar')">📅 Calendario</div>
+    <div class="nav-tab" onclick="showPage('money')">💵 Dinero</div>
   </div>
+</div>
+
+<div class="alerts hidden" id="today-alerts">
+  <div class="alerts-title">Avisos de hoy</div>
+  <div id="today-alert-list"></div>
 </div>
 
 <!-- PAGE: OBJECTIVES -->
@@ -204,7 +306,7 @@
   </div>
   <div class="objectives" id="objectives">
 
-    <div class="obj-card" data-cat="work" data-id="obj_work">
+    <div class="obj-card" data-cat="work" data-id="obj_work" data-challenge-type="long">
       <div class="obj-header">
         <div class="obj-icon" onclick="toggleObj(this.closest('.obj-card'))">💼</div>
         <div class="obj-info" onclick="toggleObj(this.closest('.obj-card'))">
@@ -303,6 +405,15 @@
     <button class="btn-primary" onclick="openObjModal()">＋ Nuevo Objetivo</button>
     <button class="btn-secondary" onclick="resetAll()">↺ Reiniciar</button>
   </div>
+  <div class="backup-panel">
+    <div class="backup-title">Copia de seguridad</div>
+    <div class="backup-text">Exportá tus datos antes de borrar caché, cambiar de celular o reinstalar la app.</div>
+    <div class="backup-actions">
+      <button class="btn-secondary" onclick="exportBackup()">Exportar datos</button>
+      <button class="btn-secondary" onclick="document.getElementById('backup-file').click()">Importar datos</button>
+      <input id="backup-file" type="file" accept="application/json,.json" style="display:none" onchange="importBackupFile(this)">
+    </div>
+  </div>
 </div>
 
 <!-- PAGE: RECURRING -->
@@ -310,6 +421,13 @@
   <div class="rec-header" style="margin-top:.8rem">
     <div class="rec-title">Rutinas Diarias</div>
     <div class="rec-date" id="rec-date-label"></div>
+  </div>
+  <div class="notify-row">
+    <div>
+      <div style="font-size:.82rem;font-weight:700">Alarmas del navegador</div>
+      <div style="font-size:.72rem;color:var(--muted)">Funcionan mientras la app está abierta.</div>
+    </div>
+    <button class="btn-secondary" onclick="requestNotifications()">ACTIVAR</button>
   </div>
   <div class="streak-box">
     <div class="streak-fire">🔥</div>
@@ -325,46 +443,9 @@
     </div>
     <div class="big-bar"><div class="big-bar-fill" id="rec-bar" style="background:var(--recurring)"></div></div>
   </div>
-  <div class="rec-list" id="rec-list">
-    <div class="rec-item" data-id="r1">
-      <div class="rec-icon">💧</div>
-      <div class="rec-label">Tomar 8 vasos de agua</div>
-      <div class="rec-actions">
-        <button class="icon-btn" onclick="editRecOpen(this.closest('.rec-item'))">✏️</button>
-        <button class="icon-btn del" onclick="deleteRec(this.closest('.rec-item'))">🗑️</button>
-      </div>
-      <div class="rec-check" onclick="toggleRec(this.parentElement)"></div>
-    </div>
-    <div class="rec-item" data-id="r2">
-      <div class="rec-icon">🏃</div>
-      <div class="rec-label">Hacer ejercicio o caminar</div>
-      <div class="rec-actions">
-        <button class="icon-btn" onclick="editRecOpen(this.closest('.rec-item'))">✏️</button>
-        <button class="icon-btn del" onclick="deleteRec(this.closest('.rec-item'))">🗑️</button>
-      </div>
-      <div class="rec-check" onclick="toggleRec(this.parentElement)"></div>
-    </div>
-    <div class="rec-item" data-id="r3">
-      <div class="rec-icon">📱</div>
-      <div class="rec-label">Revisar mensajes de la ferretería</div>
-      <div class="rec-actions">
-        <button class="icon-btn" onclick="editRecOpen(this.closest('.rec-item'))">✏️</button>
-        <button class="icon-btn del" onclick="deleteRec(this.closest('.rec-item'))">🗑️</button>
-      </div>
-      <div class="rec-check" onclick="toggleRec(this.parentElement)"></div>
-    </div>
-    <div class="rec-item" data-id="r4">
-      <div class="rec-icon">📒</div>
-      <div class="rec-label">Anotar 1 tarea pendiente del día</div>
-      <div class="rec-actions">
-        <button class="icon-btn" onclick="editRecOpen(this.closest('.rec-item'))">✏️</button>
-        <button class="icon-btn del" onclick="deleteRec(this.closest('.rec-item'))">🗑️</button>
-      </div>
-      <div class="rec-check" onclick="toggleRec(this.parentElement)"></div>
-    </div>
-  </div>
+  <div class="rec-list" id="rec-list"></div>
   <div class="bottom-btns">
-    <button class="btn-primary" style="background:var(--recurring)" onclick="openRecModal()">＋ Nueva Rutina</button>
+    <button class="btn-primary" style="background:var(--recurring)" onclick="openRecModal()">＋ Crear rutina</button>
     <button class="btn-secondary" onclick="resetRecToday()">↺ Reiniciar hoy</button>
   </div>
 </div>
@@ -381,10 +462,83 @@
     <div class="legend-item"><div class="legend-dot" style="background:var(--finance)"></div> Día completo</div>
     <div class="legend-item"><div class="legend-dot" style="background:var(--health)"></div> Tarea objetivo</div>
     <div class="legend-item"><div class="legend-dot" style="background:var(--recurring)"></div> Rutina diaria</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--danger)"></div> Vencimiento</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--health)"></div> Ingreso</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--danger)"></div> Gasto</div>
   </div>
   <div class="day-detail" id="day-detail">
     <div class="day-detail-title">Tocá un día para ver detalle</div>
   </div>
+</div>
+
+<!-- PAGE: MONEY -->
+<div class="page" id="page-money">
+  <div class="money-summary">
+    <div class="money-box">
+      <div class="money-label">Ingresos</div>
+      <div class="money-value money-income" id="money-income-total">$0</div>
+    </div>
+    <div class="money-box">
+      <div class="money-label">Gastos</div>
+      <div class="money-value money-expense" id="money-expense-total">$0</div>
+    </div>
+    <div class="money-box">
+      <div class="money-label">Balance</div>
+      <div class="money-value money-balance" id="money-balance-total">$0</div>
+    </div>
+  </div>
+
+  <div class="money-form">
+    <div class="form-group">
+      <label class="form-label">Tipo</label>
+      <select class="form-input" id="money-type" onchange="toggleMoneyFields()">
+        <option value="income">Ingreso</option>
+        <option value="expense">Gasto</option>
+      </select>
+    </div>
+    <div class="money-row">
+      <div class="form-group">
+        <label class="form-label">Monto</label>
+        <input class="form-input" id="money-amount" type="number" min="0" step="0.01" placeholder="Ej: 4000">
+      </div>
+      <div class="form-group" id="money-expense-kind-wrap" style="display:none">
+        <label class="form-label">Tipo de gasto</label>
+        <select class="form-input" id="money-expense-kind">
+          <option value="Variable">Variable</option>
+          <option value="Fijo">Fijo</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group" id="money-source-wrap">
+      <label class="form-label">De dónde viene</label>
+      <input class="form-input" id="money-source" type="text" placeholder="Ej: venta, sueldo, ferretería">
+    </div>
+    <div class="form-group" id="money-category-wrap" style="display:none">
+      <label class="form-label">Sección</label>
+      <select class="form-input" id="money-category">
+        <option value="Alimentación">Alimentación</option>
+        <option value="Combustible">Combustible</option>
+        <option value="Ahorro">Ahorro</option>
+        <option value="Distracción">Distracción</option>
+        <option value="Suscripciones">Suscripciones</option>
+        <option value="Casa">Casa</option>
+        <option value="Gastos extraordinarios">Gastos extraordinarios</option>
+        <option value="Otro">Otro</option>
+      </select>
+    </div>
+    <div class="form-group" id="money-destination-wrap" style="display:none">
+      <label class="form-label">A qué corresponde</label>
+      <input class="form-input" id="money-destination" type="text" placeholder="Ej: supermercado, nafta, alquiler">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Detalle libre</label>
+      <input class="form-input" id="money-note" type="text" placeholder="Podés escribir cualquier aclaración">
+    </div>
+    <button class="modal-btn" onclick="saveMoneyEntry()">GUARDAR MOVIMIENTO</button>
+  </div>
+
+  <div class="day-detail-title">Movimientos</div>
+  <div class="money-list" id="money-list"></div>
 </div>
 
 <!-- MODAL: NUEVO/EDITAR OBJETIVO -->
@@ -399,6 +553,37 @@
   <div class="form-group">
     <label class="form-label">Descripción (opcional)</label>
     <input class="form-input" id="new-obj-desc" type="text" placeholder="Ej: Nivel básico en 6 meses">
+  </div>
+  <div class="form-group">
+    <label class="form-label">¿Para qué sirve hacer esto?</label>
+    <input class="form-input" id="new-obj-purpose" type="text" placeholder="Ej: mejorar mi energía, ordenar mi negocio, ahorrar tiempo">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Cómo quiero realizarlo (opcional)</label>
+    <textarea class="form-input" id="new-obj-plan" rows="3" placeholder="Ej: pasos, condiciones o forma concreta de hacerlo"></textarea>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Fecha límite (opcional)</label>
+    <input class="form-input" id="new-obj-deadline" type="date">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Hora de alarma del objetivo (opcional)</label>
+    <input class="form-input" id="new-obj-alarm-time" type="time">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Tipo de desafío</label>
+    <select class="form-input" id="new-obj-type" onchange="toggleObjRoutineFields()">
+      <option value="">Sin aclarar</option>
+      <option value="short">Corto: se puede completar en un día</option>
+      <option value="long">Largo: necesita rutina diaria</option>
+    </select>
+  </div>
+  <div id="obj-routine-fields" style="display:none">
+    <div class="form-group">
+      <label class="form-label">Rutinas diarias para avanzar</label>
+      <div id="obj-routine-editor"></div>
+      <button class="btn-secondary" type="button" onclick="addObjRoutineField()">＋ Agregar rutina</button>
+    </div>
   </div>
   <div class="form-group">
     <label class="form-label">Ícono</label>
@@ -434,10 +619,31 @@
 <!-- MODAL: EDITAR TAREA -->
 <div class="modal-overlay" id="task-modal-overlay" onclick="closeTaskModal()"></div>
 <div class="modal" id="task-modal">
-  <div class="modal-title">Editar Tarea</div>
+  <div class="modal-title" id="task-modal-title">Editar Tarea</div>
   <div class="form-group">
     <label class="form-label">Texto de la tarea</label>
     <input class="form-input" id="edit-task-text" type="text">
+  </div>
+  <div class="form-group">
+    <label class="form-label">¿Para qué sirve hacer esto?</label>
+    <input class="form-input" id="edit-task-purpose" type="text">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Cómo quiero realizarla (opcional)</label>
+    <textarea class="form-input" id="edit-task-plan" rows="3"></textarea>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Fecha límite / alarma (opcional)</label>
+    <input class="form-input" id="edit-task-due" type="date">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Prioridad (1 urgente · 10 no tanto)</label>
+    <input class="form-input" id="edit-task-priority" type="number" min="1" max="10" value="5">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Subtareas</label>
+    <div id="subtask-editor"></div>
+    <button class="btn-secondary" type="button" onclick="addSubtaskField()">＋ Agregar subtarea</button>
   </div>
   <div class="modal-btn-row">
     <button class="modal-btn" onclick="saveTask()">GUARDAR</button>
@@ -451,8 +657,60 @@
   <div class="modal-title" id="rec-modal-title">Nueva Rutina</div>
   <input type="hidden" id="edit-rec-id">
   <div class="form-group">
-    <label class="form-label">Nombre de la rutina</label>
-    <input class="form-input" id="new-rec-name" type="text" placeholder="Ej: Meditar 10 minutos">
+    <label class="form-label">Nombre de la rutina / acción</label>
+    <input class="form-input" id="new-rec-name" type="text" placeholder="Ej: 30 minutos ferretería">
+  </div>
+  <div class="form-group">
+    <label class="form-label">¿Para qué sirve hacer esto?</label>
+    <input class="form-input" id="new-rec-purpose" type="text" placeholder="Ej: avanzar en la reapertura">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Objetivo asociado (opcional)</label>
+    <select class="form-input" id="new-rec-objective" onchange="fillRecTaskSelect()"></select>
+  </div>
+  <div class="form-group" id="new-rec-task-wrap" style="display:none">
+    <label class="form-label">Tarea que completa</label>
+    <select class="form-input" id="new-rec-task" onchange="fillRecSubtaskSelect()"></select>
+  </div>
+  <div class="form-group" id="new-rec-subtask-wrap" style="display:none">
+    <label class="form-label">Subtarea específica</label>
+    <select class="form-input" id="new-rec-subtask"></select>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Cómo quiero realizarla (opcional)</label>
+    <textarea class="form-input" id="new-rec-plan" rows="3" placeholder="Ej: pasos concretos para cumplir esta rutina"></textarea>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Repetición</label>
+    <select class="form-input" id="new-rec-repeat" onchange="toggleRecScheduleFields()">
+      <option value="daily">Todos los días</option>
+      <option value="custom">Días elegidos</option>
+      <option value="once">Un solo día / acción</option>
+    </select>
+  </div>
+  <div class="form-group" id="new-rec-days-wrap" style="display:none">
+    <label class="form-label">Días</label>
+    <div class="routine-days" id="new-rec-days">
+      <label><input type="checkbox" value="1">Lu</label>
+      <label><input type="checkbox" value="2">Ma</label>
+      <label><input type="checkbox" value="3">Mi</label>
+      <label><input type="checkbox" value="4">Ju</label>
+      <label><input type="checkbox" value="5">Vi</label>
+      <label><input type="checkbox" value="6">Sa</label>
+      <label><input type="checkbox" value="0">Do</label>
+    </div>
+  </div>
+  <div class="form-group" id="new-rec-date-wrap" style="display:none">
+    <label class="form-label">Día para completar la acción</label>
+    <input class="form-input" id="new-rec-date" type="date">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Hora de alarma (opcional)</label>
+    <input class="form-input" id="new-rec-time" type="time">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Creada</label>
+    <input class="form-input" id="new-rec-created" type="text" disabled>
   </div>
   <div class="form-group">
     <label class="form-label">Ícono</label>
@@ -479,29 +737,538 @@
 <script>
   let taskCounter=100, objCounter=200, recCounter=300;
   let selObjEmoji='⭐', selObjColor='#e05c2a', selRecEmojiVal='⚡';
-  let editingTaskEl=null, editingRecEl=null;
+  let editingTaskEl=null, editingRecEl=null, newTaskAddRow=null;
   let calYear, calMonth;
   const today=new Date(), todayStr=dateStr(today);
 
   function dateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  function escapeHtml(str){return String(str||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+  function formatDateLabel(ds){
+    if(!ds) return '';
+    const p=ds.split('-');
+    return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:ds;
+  }
+  function requirePurpose(value,label){
+    if((value||'').trim()) return true;
+    alert('Antes de activar '+label+' tenés que responder: ¿Para qué sirve hacer esto?');
+    return false;
+  }
+  function ensurePurpose(el,label,title){
+    if((el.dataset.purpose||'').trim()) return true;
+    const answer=prompt('¿Para qué sirve hacer '+title+'?');
+    if(!requirePurpose(answer,label)) return false;
+    el.dataset.purpose=answer.trim();
+    save();
+    return true;
+  }
+  function askCompletionBenefit(kind,id,title){
+    const answer=prompt('Cumpliste '+title+'. ¿Cuál fue el beneficio de cumplir esto?');
+    if(!answer||!answer.trim()){
+      alert('Para marcarlo como cumplido, escribí el beneficio o aprendizaje.');
+      return false;
+    }
+    const data=JSON.parse(localStorage.getItem('mis_completion_benefits')||'[]');
+    data.push({date:todayStr,kind,id,title,benefit:answer.trim()});
+    localStorage.setItem('mis_completion_benefits',JSON.stringify(data));
+    return true;
+  }
+  function askDeletionReason(kind,title){
+    const reason=prompt('¿Por qué querés eliminar '+title+'?');
+    if(!reason||!reason.trim()){
+      alert('Para eliminarlo, escribí el motivo.');
+      return false;
+    }
+    const data=JSON.parse(localStorage.getItem('mis_deletion_reasons')||'[]');
+    data.push({date:todayStr,kind,title,reason:reason.trim()});
+    localStorage.setItem('mis_deletion_reasons',JSON.stringify(data));
+    return true;
+  }
+  function maybeAskObjectiveBenefit(card){
+    if(!objectiveComplete(card)) return true;
+    const done=JSON.parse(localStorage.getItem('mis_objective_benefit_done')||'[]');
+    if(done.includes(card.dataset.id)) return true;
+    if(!askCompletionBenefit('objective',card.dataset.id,card.querySelector('.obj-name').textContent)) return false;
+    done.push(card.dataset.id);
+    localStorage.setItem('mis_objective_benefit_done',JSON.stringify(done));
+    return true;
+  }
+  function compareDate(ds){return ds?ds.localeCompare(todayStr):0;}
+  function dueClass(ds,done){
+    if(done) return 'done';
+    return compareDate(ds)<0?'overdue':'';
+  }
+  function renderDueBadge(el,done){
+    let badge=el.classList.contains('task')
+      ? [...el.children].find(child=>child.classList.contains('due-badge'))
+      : el.querySelector('.obj-info > .due-badge');
+    const ds=el.dataset.due||el.dataset.deadline||'';
+    if(!ds){if(badge) badge.remove();return;}
+    if(!badge){
+      badge=document.createElement('div');
+      badge.className='due-badge';
+      if(el.classList.contains('task')){
+        const body=el.querySelector('.task-body')||el.querySelector('.task-text');
+        body.insertAdjacentElement('afterend',badge);
+      } else {
+        el.querySelector('.obj-meta').insertAdjacentElement('afterend',badge);
+      }
+    }
+    badge.className='due-badge '+dueClass(ds,done);
+    const time=el.dataset.alarmTime||'';
+    badge.textContent=(compareDate(ds)<0&&!done?'Vencido ':'Fecha ')+formatDateLabel(ds)+(time?' · '+time:'');
+  }
+  function renderPlanNote(el){
+    const plan=(el.dataset.plan||'').trim();
+    const parent=el.classList.contains('task')?el.querySelector('.task-body'):el.querySelector('.obj-info');
+    if(!parent) return;
+    let note=parent.querySelector('.plan-note');
+    if(!plan){if(note) note.remove();return;}
+    if(!note){
+      note=document.createElement('div');
+      note.className='plan-note';
+      parent.appendChild(note);
+    }
+    note.textContent='Cómo: '+plan;
+  }
+  function enhanceTaskMarkup(task){
+    const text=task.querySelector('.task-text');
+    if(text&&!task.querySelector('.task-body')){
+      const body=document.createElement('div');
+      body.className='task-body';
+      text.parentElement.insertBefore(body,text);
+      body.appendChild(text);
+    }
+    if(text) text.setAttribute('onclick',"toggleTask(this.closest('.task'))");
+    if(!task.dataset.priority) task.dataset.priority='5';
+    renderPriorityBadge(task);
+    renderPlanNote(task);
+    renderSubtasks(task);
+    renderTaskProgress(task);
+    renderDueBadge(task,task.classList.contains('done'));
+  }
+  function taskPriority(task){
+    const p=parseInt(task.dataset.priority||'5',10);
+    return Number.isFinite(p)?Math.min(10,Math.max(1,p)):5;
+  }
+  function renderPriorityBadge(task){
+    const body=task.querySelector('.task-body');
+    if(!body) return;
+    let badge=body.querySelector('.priority-badge');
+    if(!badge){
+      badge=document.createElement('div');
+      badge.className='priority-badge';
+      const due=body.querySelector('.due-badge');
+      body.insertBefore(badge,due||null);
+    }
+    badge.textContent='P'+taskPriority(task);
+  }
+  function getSubtasks(task){
+    if(!task.dataset.subtasks) return [];
+    try{return JSON.parse(task.dataset.subtasks).filter(s=>s&&s.text);}
+    catch(e){return [];}
+  }
+  function setSubtasks(task,subtasks){
+    task.dataset.subtasks=JSON.stringify((subtasks||[]).filter(s=>s.text));
+  }
+  function subtaskPriority(subtask){
+    const p=parseInt(subtask.priority||'5',10);
+    return Number.isFinite(p)?Math.min(10,Math.max(1,p)):5;
+  }
+  function taskProgress(task){
+    const subtasks=getSubtasks(task);
+    if(!subtasks.length) return task.classList.contains('done')?100:0;
+    const done=subtasks.filter(s=>s.done).length;
+    return Math.round(done/subtasks.length*100);
+  }
+  function topPendingSubtask(task){
+    return getSubtasks(task).filter(s=>!s.done).sort((a,b)=>subtaskPriority(a)-subtaskPriority(b))[0]||null;
+  }
+  function renderTaskProgress(task){
+    const body=task.querySelector('.task-body');
+    if(!body) return;
+    let progress=body.querySelector('.task-progress');
+    if(!progress){
+      progress=document.createElement('div');
+      progress.className='task-progress';
+      progress.innerHTML='<div class="task-mini-bar"><div class="task-mini-fill"></div></div><div class="task-pct">0%</div>';
+      body.appendChild(progress);
+    }
+    const pct=taskProgress(task);
+    progress.querySelector('.task-mini-fill').style.width=pct+'%';
+    progress.querySelector('.task-pct').textContent=pct+'%';
+  }
+  function renderSubtasks(task){
+    const body=task.querySelector('.task-body');
+    if(!body) return;
+    let wrap=body.querySelector('.subtasks');
+    const subtasks=getSubtasks(task).sort((a,b)=>subtaskPriority(a)-subtaskPriority(b));
+    if(!subtasks.length){
+      if(wrap) wrap.remove();
+      renderTaskProgress(task);
+      return;
+    }
+    if(!wrap){
+      wrap=document.createElement('div');
+      wrap.className='subtasks';
+      body.appendChild(wrap);
+    }
+    wrap.innerHTML=subtasks.map(s=>`<div class="subtask${s.done?' done':''}" data-subtask-id="${escapeHtml(s.id)}">
+      <div class="subtask-check" onclick="toggleSubtask(this.closest('.task'),'${escapeHtml(s.id)}')"></div>
+      <div class="subtask-label">${escapeHtml(s.text)}</div>
+      <div class="subtask-priority">P${subtaskPriority(s)}</div>
+    </div>`).join('');
+    task.classList.toggle('done',subtasks.every(s=>s.done));
+    renderTaskProgress(task);
+  }
+  function toggleSubtask(task,id){
+    const subtasks=getSubtasks(task);
+    const item=subtasks.find(s=>s.id===id);
+    if(!item) return;
+    if(!item.done&&!askCompletionBenefit('subtask',id,item.text)) return;
+    item.done=!item.done;
+    setSubtasks(task,subtasks);
+    renderSubtasks(task);
+    updateAll();
+    save();
+    maybeAskObjectiveBenefit(task.closest('.obj-card'));
+  }
+  function topPriorityTask(card){
+    const pending=[...card.querySelectorAll('.task')].filter(t=>taskProgress(t)<100);
+    pending.sort((a,b)=>{
+      const byPriority=taskPriority(a)-taskPriority(b);
+      if(byPriority) return byPriority;
+      const ad=a.dataset.due||'9999-12-31';
+      const bd=b.dataset.due||'9999-12-31';
+      return ad.localeCompare(bd);
+    });
+    return pending[0]||null;
+  }
+  function refreshDueBadges(){
+    document.querySelectorAll('.task').forEach(enhanceTaskMarkup);
+    document.querySelectorAll('.obj-card').forEach(card=>{
+      renderDueBadge(card,card.querySelectorAll('.task').length>0&&card.querySelectorAll('.task.done').length===card.querySelectorAll('.task').length);
+      renderPlanNote(card);
+    });
+  }
+  function renderRecTime(el){
+    const body=el.querySelector('.rec-body');
+    if(!body) return;
+    let time=body.querySelector('.rec-time');
+    if(!el.dataset.time){
+      if(time) time.remove();
+      return;
+    }
+    if(!time){
+      time=document.createElement('div');
+      time.className='rec-time';
+      body.appendChild(time);
+    }
+    time.textContent='Alarma '+el.dataset.time;
+  }
+  function enhanceRecMarkup(el){
+    const label=el.querySelector('.rec-label');
+    if(label&&!el.querySelector('.rec-body')){
+      const body=document.createElement('div');
+      body.className='rec-body';
+      label.parentElement.insertBefore(body,label);
+      body.appendChild(label);
+    }
+    renderRecTime(el);
+  }
+  function routineDoneMap(){
+    return JSON.parse(localStorage.getItem('mis_obj_routine_done')||'{}');
+  }
+  function getObjRoutines(card){
+    if(card.dataset.routines){
+      try{return JSON.parse(card.dataset.routines).filter(r=>r&&r.label);}
+      catch(e){return [];}
+    }
+    if(card.dataset.routineName){
+      return [{id:'rt_legacy',label:card.dataset.routineName,time:card.dataset.routineTime||''}];
+    }
+    return [];
+  }
+  function currentDateTimeLabel(){
+    const d=new Date();
+    return {
+      date:dateStr(d),
+      time:String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')
+    };
+  }
+  function legacyRoutine(obj){
+    return obj&&obj.routineName?[{id:'rt_legacy',label:obj.routineName,time:obj.routineTime||''}]:[];
+  }
+  function setObjRoutines(card,routines){
+    card.dataset.routines=JSON.stringify((routines||[]).filter(r=>r.label));
+    card.dataset.routineName='';
+    card.dataset.routineTime='';
+  }
+  function routineDoneId(card,routine){return card.dataset.id+'::'+routine.id;}
+  function isRoutineDone(card,routine,ds=todayStr){
+    const data=routineDoneMap();
+    return (data[ds]||[]).includes(routineDoneId(card,routine));
+  }
+  function setRoutineDone(card,routine,done){
+    const data=routineDoneMap();
+    if(!data[todayStr]) data[todayStr]=[];
+    const id=routineDoneId(card,routine);
+    data[todayStr]=data[todayStr].filter(item=>item!==id);
+    if(done) data[todayStr].push(id);
+    localStorage.setItem('mis_obj_routine_done',JSON.stringify(data));
+  }
+  function objectiveComplete(card){
+    const tasks=card.querySelectorAll('.task');
+    return tasks.length>0&&[...tasks].every(t=>taskProgress(t)===100);
+  }
+  function activeObjectiveRoutine(card,ds=todayStr){
+    if(card.dataset.challengeType!=='long'||!getObjRoutines(card).some(r=>routineAppliesOn(card,r,ds))) return false;
+    return !card.dataset.deadline||ds<=card.dataset.deadline;
+  }
+  function dayOfDate(ds){
+    const p=ds.split('-').map(Number);
+    return new Date(p[0],p[1]-1,p[2]).getDay();
+  }
+  function routineDoneEver(card,routine){
+    const data=routineDoneMap();
+    const id=routineDoneId(card,routine);
+    return Object.keys(data).some(ds=>(data[ds]||[]).includes(id));
+  }
+  function routineAppliesOn(card,routine,ds=todayStr){
+    if(card.dataset.deadline&&ds>card.dataset.deadline) return false;
+    const repeat=routine.repeat||'daily';
+    if(repeat==='once') return !routineDoneEver(card,routine);
+    if(repeat==='daily') return true;
+    const days=Array.isArray(routine.days)?routine.days:[];
+    return days.includes(dayOfDate(ds));
+  }
+  function renderChallengeMeta(card){
+    let note=card.querySelector('.challenge-note');
+    const type=(card.dataset.challengeType||'').trim();
+    if(!note){
+      note=document.createElement('div');
+      note.className='challenge-note';
+      card.querySelector('.obj-info').appendChild(note);
+    }
+    if(objectiveComplete(card)){
+      note.textContent='Desafío completado';
+    } else if(type==='long'){
+      const count=recItems().filter(r=>r.objectiveId===card.dataset.id).length;
+      note.textContent='Desafío largo'+(count?' · '+count+' rutina'+(count===1?'':'s'):'');
+    } else if(type==='short'){
+      note.textContent='Desafío corto';
+    } else {
+      note.remove();
+    }
+  }
+  function renderObjRoutine(card){
+    let wrap=card.querySelector('.obj-routines');
+    if(!activeObjectiveRoutine(card)){
+      if(wrap) wrap.remove();
+      renderChallengeMeta(card);
+      return;
+    }
+    if(!wrap){
+      wrap=document.createElement('div');
+      wrap.className='obj-routines';
+      card.querySelector('.obj-bar').insertAdjacentElement('afterend',wrap);
+    }
+    wrap.innerHTML=getObjRoutines(card).map(r=>{
+      const done=isRoutineDone(card,r);
+      const repeat=r.repeat==='once'?'Una vez':r.repeat==='custom'?'Días elegidos':'Todos los días';
+      const target=r.targetLabel?' · '+r.targetLabel:'';
+      return `<div class="obj-routine${done?' done':''}" data-routine-id="${escapeHtml(r.id)}">
+        <div class="obj-routine-check" onclick="toggleObjRoutine(this.closest('.obj-card'),'${escapeHtml(r.id)}')"></div>
+        <div class="obj-routine-text" onclick="toggleObjRoutine(this.closest('.obj-card'),'${escapeHtml(r.id)}')">
+          <div class="obj-routine-label">${escapeHtml(r.label)}</div>
+          <div class="obj-routine-meta">${escapeHtml(repeat)}${r.time?' · Alarma '+escapeHtml(r.time):''}${target} · Creada ${formatDateLabel(r.createdDate||todayStr)} ${r.createdTime||''}</div>
+        </div>
+        <div class="obj-routine-actions">
+          <button class="icon-btn" onclick="event.stopPropagation();editObjRoutineInline(this.closest('.obj-card'),'${escapeHtml(r.id)}')">✏️</button>
+          <button class="icon-btn del" onclick="event.stopPropagation();deleteObjRoutineInline(this.closest('.obj-card'),'${escapeHtml(r.id)}')">🗑️</button>
+        </div>
+      </div>`;
+    }).join('');
+    renderChallengeMeta(card);
+  }
+  function refreshObjRoutines(){
+    document.querySelectorAll('.obj-card').forEach(renderObjRoutine);
+    if(document.getElementById('page-recurring').classList.contains('active')) renderTodayRoutines();
+    renderTodayAlerts();
+  }
+  function toggleObjRoutine(card,routineId){
+    const routine=getObjRoutines(card).find(r=>r.id===routineId);
+    if(!routine) return;
+    if(!ensureRoutinePurpose(card,routine)) return;
+    const done=!isRoutineDone(card,routine);
+    if(done&&!askCompletionBenefit('routine',routineDoneId(card,routine),routine.label)) return;
+    setRoutineDone(card,routine,done);
+    if(done) logCalEvent(todayStr,'routine','Rutina: '+routine.label+' · '+card.querySelector('.obj-name').textContent);
+    renderObjRoutine(card);
+    renderTodayRoutines();
+    renderTodayAlerts();
+    if(document.getElementById('page-calendar').classList.contains('active')) renderCalendar();
+  }
+  function toggleObjRoutineFields(){
+    document.getElementById('obj-routine-fields').style.display='none';
+  }
+  function editObjRoutineInline(card,routineId){
+    const routines=getObjRoutines(card);
+    const routine=routines.find(r=>r.id===routineId);
+    if(!routine) return;
+    const label=prompt('Editar rutina',routine.label);
+    if(!label||!label.trim()) return;
+    const purpose=prompt('¿Para qué sirve hacer esta rutina?',routine.purpose||'');
+    if(!requirePurpose(purpose,'esta rutina')) return;
+    const time=prompt('Hora de alarma opcional (HH:MM)',routine.time||'')||'';
+    const options=routineAdvanceOptions(card);
+    const targetText=prompt('Tarea/subtarea asociada: escribí el número de opción o dejá vacío.\n'+options.map((o,i)=>(i+1)+'. '+o.label).join('\n'), routine.target?String(options.findIndex(o=>o.value===routine.target)+1):'');
+    if(targetText&&options[Number(targetText)-1]){
+      routine.target=options[Number(targetText)-1].value;
+      routine.targetLabel=options[Number(targetText)-1].label;
+    } else if(!targetText){
+      routine.target='';
+      routine.targetLabel='';
+    }
+    const repeat=prompt('Repetición: daily, custom u once',routine.repeat||'daily')||routine.repeat||'daily';
+    routine.repeat=['daily','custom','once'].includes(repeat)?repeat:'daily';
+    if(routine.repeat==='custom'){
+      const days=prompt('Días: Lu=1, Ma=2, Mi=3, Ju=4, Vi=5, Sa=6, Do=0. Separados por coma',(routine.days||[]).join(','));
+      routine.days=(days||'').split(',').map(v=>Number(v.trim())).filter(v=>[0,1,2,3,4,5,6].includes(v));
+    }
+    routine.label=label.trim();
+    routine.purpose=purpose.trim();
+    routine.time=time.trim();
+    setObjRoutines(card,routines);
+    renderObjRoutine(card);
+    renderTodayRoutines();
+    save();
+  }
+  function deleteObjRoutineInline(card,routineId){
+    const routines=getObjRoutines(card);
+    const routine=routines.find(r=>r.id===routineId);
+    if(!routine) return;
+    if(!askDeletionReason('routine',routine.label)) return;
+    setObjRoutines(card,routines.filter(r=>r.id!==routineId));
+    renderObjRoutine(card);
+    renderTodayRoutines();
+    updateAll();
+    save();
+  }
+  function ensureRoutinePurpose(card,routine){
+    if((routine.purpose||'').trim()) return true;
+    const purpose=prompt('¿Para qué sirve hacer esta rutina?');
+    if(!requirePurpose(purpose,'esta rutina')) return false;
+    const routines=getObjRoutines(card);
+    const current=routines.find(r=>r.id===routine.id);
+    if(current) current.purpose=purpose.trim();
+    setObjRoutines(card,routines);
+    save();
+    return true;
+  }
+  function addObjRoutineField(routine){
+    const editor=document.getElementById('obj-routine-editor');
+    const card=currentRoutineEditorCard();
+    const stamp=currentDateTimeLabel();
+    const createdDate=(routine&&routine.createdDate)||stamp.date;
+    const createdTime=(routine&&routine.createdTime)||stamp.time;
+    const repeat=(routine&&routine.repeat)||'daily';
+    const days=(routine&&Array.isArray(routine.days)?routine.days:[1,2,3,4,5,6,0]);
+    const targetOptions=card?routineAdvanceOptions(card):[];
+    const row=document.createElement('div');
+    row.className='routine-editor';
+    row.dataset.routineId=(routine&&routine.id)||('rt_'+Date.now()+'_'+Math.floor(Math.random()*1000));
+    row.dataset.createdDate=createdDate;
+    row.dataset.createdTime=createdTime;
+    row.innerHTML=`<input class="form-input routine-name" type="text" placeholder="Ej: 30 minutos dedicados ferretería" value="${escapeHtml(routine&&routine.label||'')}">
+      <input class="form-input routine-purpose" type="text" placeholder="Para qué sirve" value="${escapeHtml(routine&&routine.purpose||'')}">
+      <select class="form-input routine-target">
+        <option value="">Sin tarea/subtarea asociada</option>
+        ${targetOptions.map(o=>`<option value="${escapeHtml(o.value)}" ${routine&&routine.target===o.value?'selected':''}>P${o.priority} · ${escapeHtml(o.label)}</option>`).join('')}
+      </select>
+      <select class="form-input routine-repeat" onchange="toggleRoutineDays(this)">
+        <option value="daily" ${repeat==='daily'?'selected':''}>Todos</option>
+        <option value="custom" ${repeat==='custom'?'selected':''}>Días</option>
+        <option value="once" ${repeat==='once'?'selected':''}>Una vez</option>
+      </select>
+      <input class="form-input routine-time" type="time" value="${escapeHtml(routine&&routine.time||'')}">
+      <div class="routine-days" style="display:${repeat==='custom'?'flex':'none'}">
+        ${[['Lu',1],['Ma',2],['Mi',3],['Ju',4],['Vi',5],['Sa',6],['Do',0]].map(([label,val])=>`<label><input type="checkbox" value="${val}" ${days.includes(val)?'checked':''}>${label}</label>`).join('')}
+      </div>
+      <div class="routine-created">${formatDateLabel(createdDate)} ${createdTime}</div>
+      <button type="button" onclick="deleteRoutineField(this)">×</button>`;
+    editor.appendChild(row);
+  }
+  function currentRoutineEditorCard(){
+    const editId=document.getElementById('edit-obj-id').value;
+    return editId?document.querySelector(`.obj-card[data-id="${editId}"]`):null;
+  }
+  function toggleRoutineDays(select){
+    const days=select.closest('.routine-editor').querySelector('.routine-days');
+    if(days) days.style.display=select.value==='custom'?'flex':'none';
+  }
+  function deleteRoutineField(btn){
+    const row=btn.closest('.routine-editor');
+    const label=row.querySelector('.routine-name').value.trim()||'esta rutina';
+    if(!askDeletionReason('routine',label)) return;
+    row.remove();
+  }
+  function setRoutineEditor(routines){
+    const editor=document.getElementById('obj-routine-editor');
+    editor.innerHTML='';
+    (routines||[]).forEach(r=>addObjRoutineField(r));
+  }
+  function collectRoutineEditor(){
+    const routines=[...document.querySelectorAll('#obj-routine-editor .routine-editor')].map(row=>({
+      id:row.dataset.routineId,
+      label:row.querySelector('.routine-name').value.trim(),
+      purpose:row.querySelector('.routine-purpose').value.trim(),
+      target:row.querySelector('.routine-target').value||'',
+      targetLabel:row.querySelector('.routine-target').selectedOptions[0]?row.querySelector('.routine-target').selectedOptions[0].textContent.replace(/^P\d+\s·\s/,''):'',
+      repeat:row.querySelector('.routine-repeat').value,
+      days:[...row.querySelectorAll('.routine-days input:checked')].map(i=>Number(i.value)),
+      time:row.querySelector('.routine-time').value||'',
+      createdDate:row.dataset.createdDate,
+      createdTime:row.dataset.createdTime
+    })).filter(r=>r.label);
+    if(routines.some(r=>!r.purpose)){
+      alert('Cada rutina necesita responder: ¿Para qué sirve hacer esto?');
+      return null;
+    }
+    return routines;
+  }
 
   // PAGES
   function showPage(name){
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
     document.getElementById('page-'+name).classList.add('active');
-    document.querySelectorAll('.nav-tab')[{objectives:0,recurring:1,calendar:2}[name]].classList.add('active');
+    document.querySelectorAll('.nav-tab')[{objectives:0,recurring:1,calendar:2,money:3}[name]].classList.add('active');
     if(name==='calendar') renderCalendar();
+    if(name==='recurring') renderTodayRoutines();
+    if(name==='money') renderMoney();
   }
 
   // ===================== OBJECTIVES =====================
   function toggleTask(el){
-    el.classList.toggle('done');
+    if(!el.classList.contains('done')&&!ensurePurpose(el,'esta tarea',el.querySelector('.task-text').textContent)) return;
+    const subtasks=getSubtasks(el);
+    if(subtasks.length){
+      const markDone=taskProgress(el)<100;
+      if(markDone&&!askCompletionBenefit('task',el.dataset.id,el.querySelector('.task-text').textContent)) return;
+      subtasks.forEach(s=>s.done=markDone);
+      setSubtasks(el,subtasks);
+      renderSubtasks(el);
+    } else {
+      if(!el.classList.contains('done')&&!askCompletionBenefit('task',el.dataset.id,el.querySelector('.task-text').textContent)) return;
+      el.classList.toggle('done');
+    }
     if(el.classList.contains('done')) logCalEvent(todayStr,'obj',el.querySelector('.task-text').textContent);
     updateAll(); save();
+    maybeAskObjectiveBenefit(el.closest('.obj-card'));
   }
 
   function toggleObj(card){
+    if(!card.classList.contains('open')&&!ensurePurpose(card,'este objetivo',card.querySelector('.obj-name').textContent)) return;
     card.classList.toggle('open');
     card.querySelector('.tasks').classList.toggle('open');
     save();
@@ -510,30 +1277,58 @@
   function addTask(event,input){
     if(event&&event.key!=='Enter') return;
     const text=input.value.trim();
-    if(!text) return;
-    const tasksDiv=input.closest('.tasks');
-    const addRow=input.closest('.add-task');
-    tasksDiv.insertBefore(createTaskEl(text),addRow);
+    openNewTaskModal(input.closest('.add-task'),text);
     input.value='';
-    updateAll(); save();
   }
 
-  function createTaskEl(text,id,done){
+  function openNewTaskModal(addRow,text=''){
+    editingTaskEl=null;
+    newTaskAddRow=addRow;
+    document.getElementById('task-modal-title').textContent='Nueva Tarea';
+    document.getElementById('edit-task-text').value=text;
+    document.getElementById('edit-task-purpose').value='';
+    document.getElementById('edit-task-plan').value='';
+    document.getElementById('edit-task-due').value='';
+    document.getElementById('edit-task-priority').value='5';
+    setSubtaskEditor([]);
+    document.getElementById('task-modal-overlay').style.display='block';
+    document.getElementById('task-modal').style.display='block';
+    setTimeout(()=>document.getElementById(text?'edit-task-purpose':'edit-task-text').focus(),100);
+  }
+
+  function createTaskEl(text,id,done,due,priority,subtasks,purpose,plan){
     const div=document.createElement('div');
     div.className='task'+(done?' done':'');
     div.dataset.id=id||('c'+taskCounter++);
     div.dataset.custom='true';
-    div.innerHTML=`<div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">${text}</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div>`;
+    div.dataset.due=due||'';
+    div.dataset.priority=priority||'5';
+    div.dataset.purpose=purpose||'';
+    div.dataset.plan=plan||'';
+    setSubtasks(div,subtasks||[]);
+    div.innerHTML=`<div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-body"><div class="task-text" onclick="toggleTask(this.parentElement.closest('.task'))">${escapeHtml(text)}</div></div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div>`;
+    renderPriorityBadge(div);
+    renderSubtasks(div);
+    renderTaskProgress(div);
+    renderDueBadge(div,done);
     return div;
   }
 
   function deleteTask(el){
-    if(confirm('¿Eliminar esta tarea?')){ el.remove(); updateAll(); save(); }
+    const title=el.querySelector('.task-text').textContent;
+    if(askDeletionReason('task',title)){ el.remove(); updateAll(); save(); }
   }
 
   function editTaskOpen(el){
     editingTaskEl=el;
+    newTaskAddRow=null;
+    document.getElementById('task-modal-title').textContent='Editar Tarea';
     document.getElementById('edit-task-text').value=el.querySelector('.task-text').textContent;
+    document.getElementById('edit-task-purpose').value=el.dataset.purpose||'';
+    document.getElementById('edit-task-plan').value=el.dataset.plan||'';
+    document.getElementById('edit-task-due').value=el.dataset.due||'';
+    document.getElementById('edit-task-priority').value=taskPriority(el);
+    setSubtaskEditor(getSubtasks(el));
     document.getElementById('task-modal-overlay').style.display='block';
     document.getElementById('task-modal').style.display='block';
     setTimeout(()=>document.getElementById('edit-task-text').focus(),100);
@@ -542,23 +1337,87 @@
   function saveTask(){
     const val=document.getElementById('edit-task-text').value.trim();
     if(!val) return;
-    editingTaskEl.querySelector('.task-text').textContent=val;
+    const purpose=document.getElementById('edit-task-purpose').value.trim();
+    if(!requirePurpose(purpose,'esta tarea')) return;
+    const subtasks=collectSubtaskEditor();
+    if(subtasks===null) return;
+    const plan=document.getElementById('edit-task-plan').value.trim();
+    const due=document.getElementById('edit-task-due').value||'';
+    const priority=document.getElementById('edit-task-priority').value||'5';
+    if(editingTaskEl){
+      editingTaskEl.querySelector('.task-text').textContent=val;
+      editingTaskEl.dataset.purpose=purpose;
+      editingTaskEl.dataset.plan=plan;
+      editingTaskEl.dataset.due=due;
+      editingTaskEl.dataset.priority=priority;
+      setSubtasks(editingTaskEl,subtasks);
+      renderPriorityBadge(editingTaskEl);
+      renderPlanNote(editingTaskEl);
+      renderSubtasks(editingTaskEl);
+      renderDueBadge(editingTaskEl,editingTaskEl.classList.contains('done'));
+    } else if(newTaskAddRow){
+      const task=createTaskEl(val,null,false,due,priority,subtasks,purpose,plan);
+      newTaskAddRow.parentElement.insertBefore(task,newTaskAddRow);
+    }
     closeTaskModal();
     updateAll(); save();
   }
 
   function deleteTaskFromModal(){
-    if(confirm('¿Eliminar esta tarea?')){ editingTaskEl.remove(); closeTaskModal(); updateAll(); save(); }
+    if(!editingTaskEl){ closeTaskModal(); return; }
+    const title=editingTaskEl.querySelector('.task-text').textContent;
+    if(askDeletionReason('task',title)){ editingTaskEl.remove(); closeTaskModal(); updateAll(); save(); }
   }
 
   function closeTaskModal(){
     document.getElementById('task-modal-overlay').style.display='none';
     document.getElementById('task-modal').style.display='none';
     editingTaskEl=null;
+    newTaskAddRow=null;
+  }
+
+  function addSubtaskField(subtask){
+    const editor=document.getElementById('subtask-editor');
+    const row=document.createElement('div');
+    row.className='subtask-editor';
+    row.dataset.subtaskId=(subtask&&subtask.id)||('st_'+Date.now()+'_'+Math.floor(Math.random()*1000));
+    row.dataset.done=subtask&&subtask.done?'true':'false';
+    row.innerHTML=`<input class="form-input subtask-name" type="text" placeholder="Ej: preparar materiales" value="${escapeHtml(subtask&&subtask.text||'')}">
+      <input class="form-input subtask-purpose" type="text" placeholder="Para qué sirve" value="${escapeHtml(subtask&&subtask.purpose||'')}">
+      <input class="form-input subtask-prio" type="number" min="1" max="10" value="${escapeHtml(subtask&&subtask.priority||5)}">
+      <button type="button" onclick="deleteSubtaskField(this)">×</button>`;
+    editor.appendChild(row);
+  }
+  function deleteSubtaskField(btn){
+    const row=btn.closest('.subtask-editor');
+    const title=row.querySelector('.subtask-name').value.trim()||'esta subtarea';
+    if(!askDeletionReason('subtask',title)) return;
+    row.remove();
+  }
+  function setSubtaskEditor(subtasks){
+    const editor=document.getElementById('subtask-editor');
+    editor.innerHTML='';
+    (subtasks||[]).sort((a,b)=>subtaskPriority(a)-subtaskPriority(b)).forEach(s=>addSubtaskField(s));
+  }
+  function collectSubtaskEditor(){
+    const rows=[...document.querySelectorAll('#subtask-editor .subtask-editor')];
+    const subtasks=rows.map(row=>({
+      id:row.dataset.subtaskId,
+      text:row.querySelector('.subtask-name').value.trim(),
+      purpose:row.querySelector('.subtask-purpose').value.trim(),
+      priority:row.querySelector('.subtask-prio').value||'5',
+      done:row.dataset.done==='true'
+    })).filter(s=>s.text);
+    if(subtasks.some(s=>!s.purpose)){
+      alert('Cada subtarea necesita responder: ¿Para qué sirve hacer esto?');
+      return null;
+    }
+    return subtasks;
   }
 
   function deleteObj(card){
-    if(confirm('¿Eliminar este objetivo y todas sus tareas?')){ card.remove(); updateAll(); save(); }
+    const title=card.querySelector('.obj-name').textContent;
+    if(askDeletionReason('objective',title)){ card.remove(); updateAll(); save(); }
   }
 
   function editObjOpen(card){
@@ -567,6 +1426,13 @@
     document.getElementById('obj-modal-save').textContent='GUARDAR CAMBIOS';
     document.getElementById('new-obj-name').value=card.querySelector('.obj-name').textContent;
     document.getElementById('new-obj-desc').value=card.querySelector('.obj-meta').textContent;
+    document.getElementById('new-obj-purpose').value=card.dataset.purpose||'';
+    document.getElementById('new-obj-plan').value=card.dataset.plan||'';
+    document.getElementById('new-obj-deadline').value=card.dataset.deadline||'';
+    document.getElementById('new-obj-alarm-time').value=card.dataset.alarmTime||'';
+    document.getElementById('new-obj-type').value=card.dataset.challengeType||'';
+    setRoutineEditor(getObjRoutines(card));
+    toggleObjRoutineFields();
     // set emoji
     const icon=card.querySelector('.obj-icon').textContent;
     selObjEmoji=icon;
@@ -591,6 +1457,13 @@
       document.getElementById('obj-modal-save').textContent='CREAR OBJETIVO';
       document.getElementById('new-obj-name').value='';
       document.getElementById('new-obj-desc').value='';
+      document.getElementById('new-obj-purpose').value='';
+      document.getElementById('new-obj-plan').value='';
+      document.getElementById('new-obj-deadline').value='';
+      document.getElementById('new-obj-alarm-time').value='';
+      document.getElementById('new-obj-type').value='';
+      setRoutineEditor([]);
+      toggleObjRoutineFields();
       selObjEmoji='⭐'; selObjColor='#e05c2a';
       document.querySelectorAll('#obj-emoji-picker .emoji-opt').forEach((e,i)=>e.classList.toggle('selected',i===0));
       document.querySelectorAll('#obj-color-picker .color-opt').forEach((e,i)=>e.classList.toggle('selected',i===0));
@@ -610,6 +1483,13 @@
     const name=document.getElementById('new-obj-name').value.trim();
     if(!name) return;
     const desc=document.getElementById('new-obj-desc').value.trim();
+    const purpose=document.getElementById('new-obj-purpose').value.trim();
+    const plan=document.getElementById('new-obj-plan').value.trim();
+    if(!requirePurpose(purpose,'este objetivo')) return;
+    const deadline=document.getElementById('new-obj-deadline').value||'';
+    const alarmTime=document.getElementById('new-obj-alarm-time').value||'';
+    const challengeType=document.getElementById('new-obj-type').value;
+    const routines=[];
     const editId=document.getElementById('edit-obj-id').value;
 
     if(editId){
@@ -619,6 +1499,15 @@
         card.querySelector('.obj-icon').textContent=selObjEmoji;
         card.querySelector('.obj-name').textContent=name;
         card.querySelector('.obj-meta').textContent=desc||card.querySelector('.obj-meta').textContent;
+        card.dataset.purpose=purpose;
+        card.dataset.plan=plan;
+        card.dataset.deadline=deadline;
+        card.dataset.alarmTime=alarmTime;
+        card.dataset.challengeType=challengeType;
+        setObjRoutines(card,routines);
+        renderDueBadge(card,false);
+        renderPlanNote(card);
+        renderObjRoutine(card);
         card.style.borderLeftColor=selObjColor;
         const fill=card.querySelector('.obj-bar-fill');
         if(card.dataset.custom) fill.style.background=selObjColor;
@@ -628,25 +1517,31 @@
     } else {
       // CREATE new
       const id='obj_custom_'+objCounter++;
-      document.getElementById('objectives').appendChild(buildObjCard(id,name,desc,selObjEmoji,selObjColor,[],true));
+      document.getElementById('objectives').appendChild(buildObjCard(id,name,desc,selObjEmoji,selObjColor,[],true,deadline,challengeType,routines,alarmTime,purpose,plan));
     }
     closeObjModal();
-    updateAll(); saveCustomObjectives();
+    updateAll(); saveCustomObjectives(); saveObjMeta(); renderTodayAlerts();
   }
 
-  function buildObjCard(id,name,desc,icon,color,tasks,isNew){
+  function buildObjCard(id,name,desc,icon,color,tasks,isNew,deadline,challengeType,routines,alarmTime,purpose,plan){
     const card=document.createElement('div');
     card.className='obj-card'+(isNew?' open':'');
     card.dataset.cat='custom';
     card.dataset.id=id;
     card.dataset.custom='true';
+    card.dataset.deadline=deadline||'';
+    card.dataset.alarmTime=alarmTime||'';
+    card.dataset.purpose=purpose||'';
+    card.dataset.plan=plan||'';
+    card.dataset.challengeType=challengeType||'';
+    setObjRoutines(card,[]);
     card.style.borderLeftColor=color;
     card.innerHTML=`
       <div class="obj-header">
         <div class="obj-icon" onclick="toggleObj(this.closest('.obj-card'))">${icon}</div>
         <div class="obj-info" onclick="toggleObj(this.closest('.obj-card'))">
-          <div class="obj-name">${name}</div>
-          <div class="obj-meta">${desc||'Objetivo personalizado'}</div>
+          <div class="obj-name">${escapeHtml(name)}</div>
+          <div class="obj-meta">${escapeHtml(desc||'Objetivo personalizado')}</div>
         </div>
         <div class="obj-pct" style="color:${color}">0%</div>
         <div class="obj-actions">
@@ -657,13 +1552,18 @@
       </div>
       <div class="obj-bar"><div class="obj-bar-fill" style="background:${color}"></div></div>
       <div class="tasks ${isNew?'open':''}">
-        ${tasks.map(t=>`<div class="task${t.done?' done':''}" data-id="${t.id}" data-custom="true">
+        ${tasks.map(t=>`<div class="task${t.done?' done':''}" data-id="${t.id}" data-custom="true" data-priority="${escapeHtml(t.priority||5)}" data-purpose="${escapeHtml(t.purpose||'')}" data-plan="${escapeHtml(t.plan||'')}">
           <div class="task-check" onclick="toggleTask(this.parentElement)"></div>
-          <div class="task-text" onclick="toggleTask(this.parentElement)">${t.text}</div>
+          <div class="task-body"><div class="task-text" onclick="toggleTask(this.closest('.task'))">${escapeHtml(t.text)}</div></div>
           <div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div>
         </div>`).join('')}
         <div class="add-task"><input type="text" placeholder="Agregar tarea..." onkeydown="addTask(event,this)"><button onclick="addTask(null,this.previousElementSibling)">+</button></div>
       </div>`;
+    tasks.forEach((t,i)=>{const el=card.querySelectorAll('.task')[i]; if(el){el.dataset.due=t.due||'';el.dataset.priority=t.priority||'5';el.dataset.purpose=t.purpose||'';el.dataset.plan=t.plan||'';setSubtasks(el,t.subtasks||[]);}});
+    renderDueBadge(card,false);
+    renderPlanNote(card);
+    card.querySelectorAll('.task').forEach(enhanceTaskMarkup);
+    renderObjRoutine(card);
     return card;
   }
 
@@ -688,18 +1588,21 @@
     let totalDone=0,totalTasks=0;
     document.querySelectorAll('.obj-card').forEach(card=>{
       const tasks=card.querySelectorAll('.task');
-      const done=card.querySelectorAll('.task.done').length;
       const total=tasks.length;
-      const pct=total>0?Math.round(done/total*100):0;
+      tasks.forEach(t=>{renderSubtasks(t);renderTaskProgress(t);});
+      const progressSum=[...tasks].reduce((sum,t)=>sum+taskProgress(t),0);
+      const pct=total>0?Math.round(progressSum/total):0;
       card.querySelector('.obj-pct').textContent=pct+'%';
       const fill=card.querySelector('.obj-bar-fill');
       fill.style.width=pct+'%';
       if(card.dataset.custom) fill.style.background=card.style.borderLeftColor;
-      totalDone+=done; totalTasks+=total;
+      renderDueBadge(card,pct===100);
+      totalDone+=progressSum; totalTasks+=total;
     });
-    const overall=totalTasks>0?Math.round(totalDone/totalTasks*100):0;
+    const overall=totalTasks>0?Math.round(totalDone/totalTasks):0;
     document.getElementById('overall-pct').textContent=overall+'%';
     document.getElementById('overall-bar').style.width=overall+'%';
+    refreshObjRoutines();
   }
 
   // ===================== RECURRING =====================
@@ -717,16 +1620,205 @@
     document.getElementById('rec-bar').style.width=(total>0?Math.round(done/total*100):0)+'%';
   }
 
+  function routineAdvanceOptions(card){
+    const options=[];
+    [...card.querySelectorAll('.task')].filter(t=>taskProgress(t)<100).forEach(task=>{
+      const subtasks=getSubtasks(task).filter(s=>!s.done).sort((a,b)=>subtaskPriority(a)-subtaskPriority(b));
+      if(subtasks.length){
+        subtasks.forEach(s=>options.push({
+          value:'subtask|'+task.dataset.id+'|'+s.id,
+          label:task.querySelector('.task-text').textContent+' > '+s.text,
+          priority:subtaskPriority(s)
+        }));
+      } else {
+        options.push({
+          value:'task|'+task.dataset.id,
+          label:task.querySelector('.task-text').textContent,
+          priority:taskPriority(task)
+        });
+      }
+    });
+    return options.sort((a,b)=>a.priority-b.priority);
+  }
+
+  function recObjectiveOptions(){
+    return [...document.querySelectorAll('.obj-card')].map(card=>({
+      id:card.dataset.id,
+      name:card.querySelector('.obj-name').textContent,
+      icon:card.querySelector('.obj-icon').textContent
+    }));
+  }
+  function taskLabel(task){return task.querySelector('.task-text').textContent;}
+  function getRoutineSelectionFromLegacyTarget(target){
+    if(!target) return {};
+    const parts=target.split('|');
+    return {
+      objectiveId:parts[0]||'',
+      targetType:parts[1]||'',
+      taskId:parts[2]||'',
+      subtaskId:parts[3]||''
+    };
+  }
+  function fillRecObjectiveSelect(selected){
+    const select=document.getElementById('new-rec-objective');
+    if(!select) return;
+    const objectives=recObjectiveOptions();
+    select.innerHTML='<option value="">Sin objetivo asociado</option>'+objectives.map(o=>`<option value="${escapeHtml(o.id)}" ${selected===o.id?'selected':''}>${escapeHtml(o.icon)} ${escapeHtml(o.name)}</option>`).join('');
+    fillRecTaskSelect();
+  }
+  function fillRecTaskSelect(selected){
+    const objId=document.getElementById('new-rec-objective').value;
+    const wrap=document.getElementById('new-rec-task-wrap');
+    const select=document.getElementById('new-rec-task');
+    const card=objId?document.querySelector(`.obj-card[data-id="${objId}"]`):null;
+    if(!card){
+      wrap.style.display='none';
+      select.innerHTML='';
+      fillRecSubtaskSelect();
+      return;
+    }
+    const tasks=[...card.querySelectorAll('.task')].sort((a,b)=>taskPriority(a)-taskPriority(b));
+    wrap.style.display='block';
+    select.innerHTML='<option value="">Sin tarea específica</option>'+tasks.map(t=>`<option value="${escapeHtml(t.dataset.id)}" ${selected===t.dataset.id?'selected':''}>P${taskPriority(t)} · ${escapeHtml(taskLabel(t))}</option>`).join('');
+    fillRecSubtaskSelect();
+  }
+  function fillRecSubtaskSelect(selected){
+    const objId=document.getElementById('new-rec-objective').value;
+    const taskId=document.getElementById('new-rec-task').value;
+    const wrap=document.getElementById('new-rec-subtask-wrap');
+    const select=document.getElementById('new-rec-subtask');
+    const task=objId&&taskId?document.querySelector(`.obj-card[data-id="${objId}"] .task[data-id="${taskId}"]`):null;
+    const subtasks=task?getSubtasks(task).sort((a,b)=>subtaskPriority(a)-subtaskPriority(b)):[];
+    if(!subtasks.length){
+      wrap.style.display='none';
+      select.innerHTML='';
+      return;
+    }
+    wrap.style.display='block';
+    select.innerHTML='<option value="">Completar la tarea completa</option>'+subtasks.map(s=>`<option value="${escapeHtml(s.id)}" ${selected===s.id?'selected':''}>P${subtaskPriority(s)} · ${escapeHtml(s.text)}</option>`).join('');
+  }
+  function recItems(){
+    return JSON.parse(localStorage.getItem('mis_rec_items')||'[]');
+  }
+  function saveRecItems(items){
+    localStorage.setItem('mis_rec_items',JSON.stringify(items));
+  }
+  function recDoneKey(id){return todayStr+'::'+id;}
+  function recDoneSet(){
+    return JSON.parse(localStorage.getItem('mis_rec_done')||'[]');
+  }
+  function isRecDoneToday(id){
+    return recDoneSet().includes(recDoneKey(id));
+  }
+  function setRecDoneToday(id,done){
+    let doneList=recDoneSet().filter(x=>x!==recDoneKey(id));
+    if(done) doneList.push(recDoneKey(id));
+    localStorage.setItem('mis_rec_done',JSON.stringify(doneList));
+  }
+  function recAppliesToday(r){
+    if(r.repeat==='once') return r.date===todayStr&&!r.doneOnce;
+    if(r.repeat==='custom') return (r.days||[]).includes(new Date().getDay());
+    return true;
+  }
+  function recAppliesOnDate(r,ds){
+    if(r.repeat==='once') return r.date===ds;
+    if(r.repeat==='custom') return (r.days||[]).includes(dayOfDate(ds));
+    return true;
+  }
+  function toggleRecScheduleFields(){
+    const repeat=document.getElementById('new-rec-repeat').value;
+    document.getElementById('new-rec-days-wrap').style.display=repeat==='custom'?'block':'none';
+    document.getElementById('new-rec-date-wrap').style.display=repeat==='once'?'block':'none';
+  }
+
+  function recScheduleLabel(r){
+    const names={1:'Lu',2:'Ma',3:'Mi',4:'Ju',5:'Vi',6:'Sa',0:'Do'};
+    if(r.repeat==='once') return 'Un solo día: '+formatDateLabel(r.date||todayStr);
+    if(r.repeat==='custom') return 'Días: '+(r.days||[]).map(d=>names[d]).filter(Boolean).join(', ');
+    return 'Todos los días';
+  }
+
+  function routineAssociationLabel(r){
+    const parts=[];
+    if(r.objectiveName) parts.push('Objetivo: '+r.objectiveName);
+    if(r.taskName) parts.push('Tarea: '+r.taskName);
+    if(r.subtaskName) parts.push('Subtarea: '+r.subtaskName);
+    if(!parts.length&&r.targetLabel) parts.push(r.targetLabel);
+    return parts.join(' · ');
+  }
+
+  function renderTodayRoutines(){
+    const list=document.getElementById('rec-list');
+    if(!list) return;
+    const rows=recItems().filter(recAppliesToday);
+    if(!rows.length){
+      list.innerHTML='<div class="detail-item" style="color:var(--muted)">No hay rutinas para hoy. Tocá Crear rutina.</div>';
+      updateRec();
+      return;
+    }
+    list.innerHTML=rows.map(r=>{
+      const done=isRecDoneToday(r.id);
+      const association=routineAssociationLabel(r);
+      return `<div class="rec-item${done?' done':''}" data-id="${escapeHtml(r.id)}">
+      <div class="rec-icon">${escapeHtml(r.objectiveIcon||r.icon||'⚡')}</div>
+      <div class="rec-body">
+        <div class="rec-label">${escapeHtml(r.label)}</div>
+        <div class="rec-time">${escapeHtml(recScheduleLabel(r))}${r.time?' · Alarma '+escapeHtml(r.time):''}${association?' · '+escapeHtml(association):''} · Creada ${formatDateLabel(r.createdDate)} ${r.createdTime||''}</div>
+        ${r.plan?`<div class="rec-time">${escapeHtml(r.plan)}</div>`:''}
+      </div>
+      <div class="rec-actions">
+        <button class="icon-btn" onclick="event.stopPropagation();editRecOpen(this.closest('.rec-item'))">✏️</button>
+        <button class="icon-btn del" onclick="event.stopPropagation();deleteRec(this.closest('.rec-item'))">🗑️</button>
+      </div>
+      <div class="rec-check" onclick="toggleRec(this.parentElement)"></div>
+    </div>`;
+    }).join('');
+    updateRec();
+    checkRecStreak();
+  }
+
   function deleteRec(el){
-    if(confirm('¿Eliminar esta rutina?')){ el.remove(); saveRec(); updateRec(); }
+    const items=recItems();
+    const item=items.find(r=>r.id===el.dataset.id);
+    if(!item) return;
+    if(askDeletionReason('routine',item.label)){
+      saveRecItems(items.filter(r=>r.id!==item.id));
+      renderTodayRoutines();
+    }
+  }
+
+  function editRoutineFromRow(row){
+    const card=document.querySelector(`.obj-card[data-id="${row.dataset.objId}"]`);
+    if(card) editObjRoutineInline(card,row.dataset.routineId);
+  }
+  function deleteRoutineFromRow(row){
+    const card=document.querySelector(`.obj-card[data-id="${row.dataset.objId}"]`);
+    if(card) deleteObjRoutineInline(card,row.dataset.routineId);
   }
 
   function editRecOpen(el){
-    editingRecEl=el;
-    document.getElementById('edit-rec-id').value=el.dataset.id;
+    const item=recItems().find(r=>r.id===el.dataset.id);
+    if(!item) return;
+    editingRecEl=null;
+    document.getElementById('edit-rec-id').value=item.id;
     document.getElementById('rec-modal-title').textContent='Editar Rutina';
-    document.getElementById('new-rec-name').value=el.querySelector('.rec-label').textContent;
-    const icon=el.querySelector('.rec-icon').textContent;
+    document.getElementById('new-rec-name').value=item.label||'';
+    document.getElementById('new-rec-purpose').value=item.purpose||'';
+    document.getElementById('new-rec-plan').value=item.plan||'';
+    const legacy=getRoutineSelectionFromLegacyTarget(item.target||'');
+    const objectiveId=item.objectiveId||legacy.objectiveId||'';
+    const taskId=item.taskId||legacy.taskId||'';
+    const subtaskId=item.subtaskId||legacy.subtaskId||'';
+    fillRecObjectiveSelect(objectiveId);
+    fillRecTaskSelect(taskId);
+    fillRecSubtaskSelect(subtaskId);
+    document.getElementById('new-rec-repeat').value=item.repeat||'daily';
+    document.getElementById('new-rec-date').value=item.date||todayStr;
+    document.querySelectorAll('#new-rec-days input').forEach(i=>i.checked=(item.days||[]).includes(Number(i.value)));
+    document.getElementById('new-rec-time').value=item.time||'';
+    document.getElementById('new-rec-created').value=formatDateLabel(item.createdDate||todayStr)+' '+(item.createdTime||'');
+    toggleRecScheduleFields();
+    const icon=item.icon||'⚡';
     selRecEmojiVal=icon;
     document.querySelectorAll('#rec-emoji-picker .emoji-opt').forEach(e=>e.classList.toggle('selected',e.textContent===icon));
     document.getElementById('rec-modal-btns').innerHTML=`
@@ -742,6 +1834,16 @@
     document.getElementById('edit-rec-id').value='';
     document.getElementById('rec-modal-title').textContent='Nueva Rutina';
     document.getElementById('new-rec-name').value='';
+    document.getElementById('new-rec-purpose').value='';
+    document.getElementById('new-rec-plan').value='';
+    fillRecObjectiveSelect('');
+    document.getElementById('new-rec-repeat').value='daily';
+    document.getElementById('new-rec-date').value=todayStr;
+    document.querySelectorAll('#new-rec-days input').forEach(i=>i.checked=true);
+    document.getElementById('new-rec-time').value='';
+    const stamp=currentDateTimeLabel();
+    document.getElementById('new-rec-created').value=formatDateLabel(stamp.date)+' '+stamp.time;
+    toggleRecScheduleFields();
     selRecEmojiVal='⚡';
     document.querySelectorAll('#rec-emoji-picker .emoji-opt').forEach((e,i)=>e.classList.toggle('selected',i===0));
     document.getElementById('rec-modal-btns').innerHTML=`<button class="modal-btn" style="background:var(--recurring)" onclick="saveRec()">AGREGAR RUTINA</button>`;
@@ -764,28 +1866,75 @@
 
   function saveRec(){
     const name=document.getElementById('new-rec-name').value.trim();
+    const purpose=document.getElementById('new-rec-purpose').value.trim();
+    const plan=document.getElementById('new-rec-plan').value.trim();
+    const time=document.getElementById('new-rec-time').value||'';
+    const repeat=document.getElementById('new-rec-repeat').value;
+    const date=document.getElementById('new-rec-date').value||todayStr;
+    const days=[...document.querySelectorAll('#new-rec-days input:checked')].map(i=>Number(i.value));
+    const objectiveId=document.getElementById('new-rec-objective').value||'';
+    const taskId=document.getElementById('new-rec-task').value||'';
+    const subtaskId=document.getElementById('new-rec-subtask').value||'';
+    const card=objectiveId?document.querySelector(`.obj-card[data-id="${objectiveId}"]`):null;
+    const task=card&&taskId?card.querySelector(`.task[data-id="${taskId}"]`):null;
+    const subtask=task&&subtaskId?getSubtasks(task).find(s=>s.id===subtaskId):null;
+    const objectiveName=card?card.querySelector('.obj-name').textContent:'';
+    const objectiveIcon=card?card.querySelector('.obj-icon').textContent:'';
+    const taskName=task?taskLabel(task):'';
+    const subtaskName=subtask?subtask.text:'';
+    const target=objectiveId&&taskId?(objectiveId+'|'+(subtaskId?'subtask':'task')+'|'+taskId+(subtaskId?'|'+subtaskId:'')):'';
+    const targetLabel=[objectiveName,taskName,subtaskName].filter(Boolean).join(' · ');
     if(!name) return;
-    if(editingRecEl){
-      editingRecEl.querySelector('.rec-label').textContent=name;
-      editingRecEl.querySelector('.rec-icon').textContent=selRecEmojiVal;
+    if(!requirePurpose(purpose,'esta rutina')) return;
+    if(repeat==='custom'&&!days.length){alert('Elegí al menos un día.');return;}
+    const items=recItems();
+    const editId=document.getElementById('edit-rec-id').value;
+    const existing=items.find(r=>r.id===editId);
+    const stamp=currentDateTimeLabel();
+    const payload={
+      id:editId||('r_'+Date.now()),
+      label:name,
+      purpose,
+      plan,
+      icon:selRecEmojiVal,
+      objectiveId,
+      objectiveName,
+      objectiveIcon,
+      taskId,
+      taskName,
+      subtaskId,
+      subtaskName,
+      time,
+      repeat,
+      date,
+      days,
+      target,
+      targetLabel,
+      createdDate:existing?existing.createdDate:stamp.date,
+      createdTime:existing?existing.createdTime:stamp.time,
+      doneOnce:existing?!!existing.doneOnce:false
+    };
+    if(existing){
+      Object.assign(existing,payload);
     } else {
-      const id='r_custom_'+recCounter++;
-      const el=document.createElement('div');
-      el.className='rec-item';
-      el.dataset.id=id;
-      el.dataset.custom='true';
-      el.innerHTML=`<div class="rec-icon">${selRecEmojiVal}</div><div class="rec-label">${name}</div><div class="rec-actions"><button class="icon-btn" onclick="editRecOpen(this.closest('.rec-item'))">✏️</button><button class="icon-btn del" onclick="deleteRec(this.closest('.rec-item'))">🗑️</button></div><div class="rec-check" onclick="toggleRec(this.parentElement)"></div>`;
-      document.getElementById('rec-list').appendChild(el);
+      items.push(payload);
     }
     closeRecModal();
-    persistRec(); updateRec();
+    saveRecItems(items);
+    updateAll();
+    renderTodayRoutines();
+    renderTodayAlerts();
+    if(document.getElementById('page-calendar').classList.contains('active')) renderCalendar();
   }
 
   function deleteRecFromModal(){
-    if(confirm('¿Eliminar esta rutina?')){
-      editingRecEl.remove();
+    const editId=document.getElementById('edit-rec-id').value;
+    const items=recItems();
+    const item=items.find(r=>r.id===editId);
+    if(item&&askDeletionReason('routine',item.label)){
+      saveRecItems(items.filter(r=>r.id!==editId));
       closeRecModal();
-      persistRec(); updateRec();
+      renderTodayRoutines();
     }
   }
 
@@ -794,6 +1943,7 @@
       id:i.dataset.id,
       icon:i.querySelector('.rec-icon').textContent,
       label:i.querySelector('.rec-label').textContent,
+      time:i.dataset.time||'',
       custom:!!i.dataset.custom
     }));
     localStorage.setItem('mis_rec_items',JSON.stringify(customs));
@@ -815,8 +1965,9 @@
   }
 
   function resetRecToday(){
-    document.querySelectorAll('.rec-item').forEach(i=>i.classList.remove('done'));
-    localStorage.removeItem('mis_rec_done');
+    const done=recDoneSet().filter(k=>!k.startsWith(todayStr+'::'));
+    localStorage.setItem('mis_rec_done',JSON.stringify(done));
+    renderTodayRoutines();
     updateRec();
   }
 
@@ -829,13 +1980,228 @@
     localStorage.setItem('mis_rec_lastday',todayStr);
   }
 
+  function todayChallengeItems(){
+    const items=[];
+    document.querySelectorAll('.obj-card').forEach(card=>{
+      const name=card.querySelector('.obj-name').textContent;
+      if(activeObjectiveRoutine(card)){
+        getObjRoutines(card).forEach(r=>{
+          if(!isRoutineDone(card,r)) items.push({type:'routine',text:'Rutina pendiente: '+r.label+' · '+name,time:r.time||''});
+        });
+      }
+      if(card.dataset.deadline===todayStr&&!objectiveComplete(card)){
+        items.push({type:'due',text:'Vence hoy: '+name,time:card.dataset.alarmTime||''});
+      }
+      card.querySelectorAll('.task').forEach(task=>{
+        if(task.dataset.due===todayStr&&!task.classList.contains('done')){
+          items.push({type:'task',text:'Tarea vence hoy: '+task.querySelector('.task-text').textContent+' · '+name,time:''});
+        }
+      });
+    });
+    recItems().filter(recAppliesToday).forEach(r=>{
+      if(isRecDoneToday(r.id)) return;
+      items.push({type:'routine',text:(r.repeat==='once'?'Acción pendiente: ':'Rutina pendiente: ')+r.label+(r.objectiveName?' · '+r.objectiveName:'')+(r.taskName?' · '+r.taskName:'')+(r.subtaskName?' · '+r.subtaskName:''),time:r.time||''});
+    });
+    return items;
+  }
+  function renderTodayAlerts(){
+    const box=document.getElementById('today-alerts');
+    const list=document.getElementById('today-alert-list');
+    if(!box||!list) return;
+    const items=todayChallengeItems();
+    box.classList.toggle('hidden',items.length===0);
+    list.innerHTML=items.map(i=>`<div class="alert-item">${i.type==='routine'?'🔄':i.type==='due'?'⏰':'✅'} <span>${escapeHtml(i.text)}</span>${i.time?' · '+i.time:''}</div>`).join('');
+  }
+  function registerPwa(){
+    if(!('serviceWorker' in navigator)) return;
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  }
+  function showAppNotification(title,body,tag){
+    if(!('Notification' in window)||Notification.permission!=='granted') return;
+    const options={body,tag,icon:'icon.svg',badge:'icon.svg'};
+    if(navigator.serviceWorker&&navigator.serviceWorker.ready){
+      navigator.serviceWorker.ready.then(reg=>reg.showNotification(title,options)).catch(()=>new Notification(title,options));
+    } else {
+      new Notification(title,options);
+    }
+  }
+  function requestNotifications(){
+    if(!('Notification' in window)){
+      alert('Este navegador no permite notificaciones.');
+      return;
+    }
+    Notification.requestPermission().then(permission=>{
+      if(permission==='granted') alert('Notificaciones activadas. Instalá la app desde Chrome para mejor funcionamiento.');
+      checkAlarms();
+    });
+  }
+  function checkAlarms(){
+    if(!('Notification' in window)||Notification.permission!=='granted') return;
+    const now=new Date();
+    const hm=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    const sentKey='mis_alarm_sent_'+todayStr;
+    const sent=JSON.parse(localStorage.getItem(sentKey)||'[]');
+    document.querySelectorAll('.obj-card').forEach(card=>{
+      if(card.dataset.deadline===todayStr&&!objectiveComplete(card)&&card.dataset.alarmTime===hm){
+        const id='due_'+card.dataset.id+'_'+hm;
+        if(!sent.includes(id)){
+          showAppNotification('Objetivo de hoy',card.querySelector('.obj-name').textContent,id);
+          sent.push(id);
+        }
+      }
+      if(!activeObjectiveRoutine(card)) return;
+      getObjRoutines(card).forEach(r=>{
+        if(!routineAppliesOn(card,r)) return;
+        if(isRoutineDone(card,r)||r.time!==hm) return;
+        const id='obj_'+card.dataset.id+'_'+r.id+'_'+hm;
+        if(sent.includes(id)) return;
+        showAppNotification('Desafío diario',r.label+' · '+card.querySelector('.obj-name').textContent,id);
+        sent.push(id);
+      });
+    });
+    recItems().filter(recAppliesToday).forEach(r=>{
+      if(isRecDoneToday(r.id)||r.time!==hm) return;
+      const id='rec_'+r.id+'_'+hm;
+      if(sent.includes(id)) return;
+      showAppNotification(r.repeat==='once'?'Acción pendiente':'Rutina pendiente',r.label+(r.objectiveName?' · '+r.objectiveName:'')+(r.taskName?' · '+r.taskName:''),id);
+      sent.push(id);
+    });
+    localStorage.setItem(sentKey,JSON.stringify(sent));
+  }
+
+  // ===================== MONEY =====================
+  function moneyEntries(){
+    return JSON.parse(localStorage.getItem('mis_money_entries')||'[]');
+  }
+  function moneyNow(){
+    const d=new Date();
+    return {
+      date:dateStr(d),
+      time:String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')
+    };
+  }
+  function formatMoney(n){
+    return '$'+Number(n||0).toLocaleString('es-AR',{maximumFractionDigits:2});
+  }
+  function toggleMoneyFields(){
+    const isExpense=document.getElementById('money-type').value==='expense';
+    document.getElementById('money-expense-kind-wrap').style.display=isExpense?'block':'none';
+    document.getElementById('money-category-wrap').style.display=isExpense?'block':'none';
+    document.getElementById('money-destination-wrap').style.display=isExpense?'block':'none';
+    document.getElementById('money-source-wrap').style.display=isExpense?'none':'block';
+  }
+  function saveMoneyEntry(){
+    const type=document.getElementById('money-type').value;
+    const amount=Number(document.getElementById('money-amount').value);
+    if(!amount||amount<=0){alert('Ingresá un monto válido.');return;}
+    const stamp=moneyNow();
+    const entry={
+      id:'m_'+Date.now(),
+      type,
+      amount,
+      date:stamp.date,
+      time:stamp.time,
+      source:document.getElementById('money-source').value.trim(),
+      expenseKind:document.getElementById('money-expense-kind').value,
+      category:document.getElementById('money-category').value,
+      destination:document.getElementById('money-destination').value.trim(),
+      note:document.getElementById('money-note').value.trim()
+    };
+    if(type==='income'&&!entry.source){alert('Indicá de dónde viene el ingreso.');return;}
+    if(type==='expense'&&!entry.destination){alert('Indicá a qué corresponde el gasto.');return;}
+    const data=moneyEntries();
+    data.push(entry);
+    localStorage.setItem('mis_money_entries',JSON.stringify(data));
+    const desc=type==='income'
+      ? `Ingreso ${formatMoney(amount)} · ${entry.source} · día ${formatDateLabel(entry.date)} hora ${entry.time}${entry.note?' · '+entry.note:''}`
+      : `Gasto ${formatMoney(amount)} · ${entry.expenseKind} · ${entry.category} · ${entry.destination} · día ${formatDateLabel(entry.date)} hora ${entry.time}${entry.note?' · '+entry.note:''}`;
+    logCalEvent(entry.date,type==='income'?'income':'expense',desc);
+    document.getElementById('money-amount').value='';
+    document.getElementById('money-source').value='';
+    document.getElementById('money-destination').value='';
+    document.getElementById('money-note').value='';
+    renderMoney();
+  }
+  function deleteMoneyEntry(id){
+    const data=moneyEntries();
+    const entry=data.find(e=>e.id===id);
+    if(!entry) return;
+    if(!askDeletionReason('money',entry.type==='income'?'ingreso':'gasto')) return;
+    localStorage.setItem('mis_money_entries',JSON.stringify(data.filter(e=>e.id!==id)));
+    renderMoney();
+  }
+  function renderMoney(){
+    const list=document.getElementById('money-list');
+    if(!list) return;
+    toggleMoneyFields();
+    const data=moneyEntries().slice().sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
+    const income=data.filter(e=>e.type==='income').reduce((s,e)=>s+Number(e.amount),0);
+    const expense=data.filter(e=>e.type==='expense').reduce((s,e)=>s+Number(e.amount),0);
+    document.getElementById('money-income-total').textContent=formatMoney(income);
+    document.getElementById('money-expense-total').textContent=formatMoney(expense);
+    document.getElementById('money-balance-total').textContent=formatMoney(income-expense);
+    if(!data.length){
+      list.innerHTML='<div class="detail-item" style="color:var(--muted)">Todavía no hay movimientos.</div>';
+      return;
+    }
+    list.innerHTML=data.map(e=>`<div class="money-item ${e.type==='expense'?'expense':'income'}">
+      <div class="money-main">
+        <div class="money-title">${e.type==='income'?'Ingreso':'Gasto'} · ${escapeHtml(e.type==='income'?e.source:e.destination)}</div>
+        <div class="money-meta">${formatDateLabel(e.date)} · ${escapeHtml(e.time)}${e.type==='expense'?' · '+escapeHtml(e.expenseKind)+' · '+escapeHtml(e.category):''}${e.note?' · '+escapeHtml(e.note):''}</div>
+      </div>
+      <div class="money-amount ${e.type==='income'?'money-income':'money-expense'}">${e.type==='income'?'+':'-'}${formatMoney(e.amount)}</div>
+      <button class="icon-btn del" onclick="deleteMoneyEntry('${escapeHtml(e.id)}')">🗑️</button>
+    </div>`).join('');
+  }
+
   // ===================== CALENDAR =====================
   function logCalEvent(dateS,type,desc){
     const data=JSON.parse(localStorage.getItem('mis_cal_events')||'{}');
     if(!data[dateS]) data[dateS]=[];
-    if(!data[dateS].find(e=>e.type===type&&e.desc===desc)) data[dateS].push({type,desc});
+    const now=new Date();
+    const time=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    if(!data[dateS].find(e=>e.type===type&&e.desc===desc)) data[dateS].push({type,desc,time});
     localStorage.setItem('mis_cal_events',JSON.stringify(data));
     if(document.getElementById('page-calendar').classList.contains('active')) renderCalendar();
+  }
+
+  function addDaysStr(ds,amount){
+    const [y,m,d]=ds.split('-').map(Number);
+    const date=new Date(y,m-1,d);
+    date.setDate(date.getDate()+amount);
+    return dateStr(date);
+  }
+
+  function isRecDoneOnDate(id,ds){
+    return recDoneSet().includes(ds+'::'+id);
+  }
+
+  function plannedForDate(ds){
+    const planned=[];
+    document.querySelectorAll('.obj-card').forEach(card=>{
+      const objName=card.querySelector('.obj-name').textContent;
+      if(card.dataset.deadline===ds&&!objectiveComplete(card)){
+        planned.push({type:'due',icon:card.querySelector('.obj-icon').textContent,desc:'Vence objetivo: '+objName+(card.dataset.alarmTime?' · '+card.dataset.alarmTime:''),objective:objName,time:card.dataset.alarmTime||''});
+      }
+      if(activeObjectiveRoutine(card,ds)){
+        getObjRoutines(card).forEach(r=>{
+          if(!routineAppliesOn(card,r,ds)) return;
+          const done=isRoutineDone(card,r,ds);
+          planned.push({type:'alarm',icon:card.querySelector('.obj-icon').textContent,done,desc:(done?'Rutina cumplida: ':'Rutina diaria: ')+r.label+' · '+objName,time:r.time||'',objective:objName});
+        });
+      }
+      card.querySelectorAll('.task').forEach(task=>{
+        if(task.dataset.due===ds&&!task.classList.contains('done')){
+          planned.push({type:'due',icon:'⏰',desc:'Vence tarea: '+task.querySelector('.task-text').textContent+' · '+objName,objective:objName,time:''});
+        }
+      });
+    });
+    recItems().filter(r=>recAppliesOnDate(r,ds)).forEach(r=>{
+      const association=routineAssociationLabel(r);
+      const done=isRecDoneOnDate(r.id,ds);
+      planned.push({type:'alarm',icon:r.objectiveIcon||r.icon||'🔄',done,desc:(done?'Cumplida: ':r.repeat==='once'?'Acción pendiente: ':'Rutina pendiente: ')+r.label+(r.time?' · '+r.time:'')+(association?' · '+association:''),time:r.time||'',objective:r.objectiveName||'',task:r.taskName||'',subtask:r.subtaskName||''});
+    });
+    return planned;
   }
 
   function renderCalendar(){
@@ -856,32 +2222,152 @@
       const el=document.createElement('div');
       el.className='cal-day'+(ds===todayStr?' today':'');
       const evts=events[ds]||[];
+      const planned=plannedForDate(ds);
       const hasRec=evts.some(e=>e.type==='rec')||recHistory[ds];
       const hasObj=evts.some(e=>e.type==='obj');
       const isFull=recHistory[ds];
-      el.innerHTML=`<div class="day-num">${d}</div><div class="dots">
+      const hasDue=planned.some(e=>e.type==='due');
+      const hasAlarm=planned.some(e=>e.type==='alarm');
+      const hasIncome=evts.some(e=>e.type==='income');
+      const hasExpense=evts.some(e=>e.type==='expense');
+      const icons=[...new Set(planned.filter(e=>e.type==='alarm'&&e.icon).map(e=>e.icon))].slice(0,3);
+      const pendingCount=planned.filter(e=>e.type==='due'||(e.type==='alarm'&&!e.done)).length;
+      const doneCount=evts.filter(e=>['obj','rec','routine','full'].includes(e.type)).length+planned.filter(e=>e.done).length;
+      el.innerHTML=`<div class="day-num">${d}</div>${icons.length?`<div class="cal-icons">${icons.map(i=>escapeHtml(i)).join('')}</div>`:''}${pendingCount?`<div class="cal-count">${pendingCount} pend.</div>`:doneCount?`<div class="cal-count">${doneCount} hecho</div>`:''}<div class="dots">
         ${isFull?'<div class="dot full"></div>':''}
         ${hasObj?'<div class="dot obj"></div>':''}
+        ${hasDue?'<div class="dot due"></div>':''}
+        ${hasAlarm?'<div class="dot alarm"></div>':''}
+        ${hasIncome?'<div class="dot income"></div>':''}
+        ${hasExpense?'<div class="dot expense"></div>':''}
         ${hasRec&&!isFull?'<div class="dot rec"></div>':''}
       </div>`;
-      el.onclick=()=>showDayDetail(ds,evts,recHistory[ds]);
+      el.onclick=()=>showDayDetail(ds,evts,recHistory[ds],planned);
       grid.appendChild(el);
     }
   }
 
-  function showDayDetail(ds,evts,recComplete){
+  function showDayDetail(ds,evts,recComplete,planned){
     const det=document.getElementById('day-detail');
     const p=ds.split('-');
+    planned=planned||plannedForDate(ds);
+    const nextDs=addDaysStr(ds,1);
+    const nextPlanned=plannedForDate(nextDs).filter(e=>e.type==='due'||(e.type==='alarm'&&!e.done));
+    const pending=planned.filter(e=>e.type==='due'||(e.type==='alarm'&&!e.done));
+    const completedPlanned=planned.filter(e=>e.done);
+    const completedEvents=evts.filter(e=>['obj','rec','routine','full'].includes(e.type));
+    const moneyEvents=evts.filter(e=>['income','expense'].includes(e.type));
+    const otherEvents=evts.filter(e=>!['obj','rec','routine','full','income','expense'].includes(e.type));
+    const itemHtml=e=>{
+      const icon=e.icon||eventIcon(e.type);
+      const time=e.time&&!['income','expense'].includes(e.type)?' · '+e.time:'';
+      return `<div class="detail-item">${icon} <span>${escapeHtml(e.desc)}${escapeHtml(time)}</span></div>`;
+    };
     let html=`<div class="day-detail-title">${p[2]}/${p[1]}/${p[0]}</div>`;
-    if(!evts.length&&!recComplete) html+=`<div class="detail-item" style="color:var(--muted)">Sin actividad registrada</div>`;
-    else{
+    if(!evts.length&&!recComplete&&!planned.length&&!nextPlanned.length) html+=`<div class="detail-item" style="color:var(--muted)">Sin actividad registrada</div>`;
+    if(pending.length){
+      html+=`<div class="detail-section">Pendiente este día</div>`;
+      html+=pending.map(itemHtml).join('');
+    }
+    if(completedPlanned.length||completedEvents.length||recComplete){
+      html+=`<div class="detail-section">Cumplido este día</div>`;
+      html+=completedPlanned.map(itemHtml).join('');
       if(recComplete) html+=`<div class="detail-item">🔥 <span>Todas las rutinas completadas</span></div>`;
-      evts.forEach(e=>{
-        const icon=e.type==='obj'?'✅':e.type==='rec'?'🔄':'⭐';
-        html+=`<div class="detail-item">${icon} <span>${e.desc}</span></div>`;
-      });
+      html+=completedEvents.map(itemHtml).join('');
+    }
+    if(moneyEvents.length){
+      html+=`<div class="detail-section">Ingresos y gastos</div>`;
+      html+=moneyEvents.map(itemHtml).join('');
+    }
+    if(otherEvents.length){
+      html+=`<div class="detail-section">Otros registros</div>`;
+      html+=otherEvents.map(itemHtml).join('');
+    }
+    if(nextPlanned.length){
+      const np=nextDs.split('-');
+      html+=`<div class="detail-section">Día siguiente ${np[2]}/${np[1]}</div>`;
+      html+=nextPlanned.slice(0,5).map(itemHtml).join('');
+      if(nextPlanned.length>5) html+=`<div class="detail-item"><span>Y ${nextPlanned.length-5} más</span></div>`;
     }
     det.innerHTML=html;
+  }
+
+  function eventIcon(type){
+    return type==='obj'?'✅':type==='rec'||type==='routine'?'🔄':type==='income'?'💵':type==='expense'?'💸':type==='full'?'🔥':'⭐';
+  }
+
+  // ===================== BACKUP =====================
+  function appStorageKeys(){
+    const keys=[];
+    for(let i=0;i<localStorage.length;i++){
+      const key=localStorage.key(i);
+      if(key&&key.startsWith('mis_')) keys.push(key);
+    }
+    return keys.sort();
+  }
+
+  function backupPayload(){
+    const data={};
+    appStorageKeys().forEach(key=>data[key]=localStorage.getItem(key));
+    return {
+      app:'mis-objetivos',
+      version:1,
+      exportedAt:new Date().toISOString(),
+      data
+    };
+  }
+
+  function backupFileName(){
+    const d=new Date();
+    const stamp=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'_'+String(d.getHours()).padStart(2,'0')+'-'+String(d.getMinutes()).padStart(2,'0');
+    return 'objetivos-backup-'+stamp+'.json';
+  }
+
+  function exportBackup(){
+    save();
+    saveRecItems(recItems());
+    localStorage.setItem('mis_money_entries',JSON.stringify(moneyEntries()));
+    const json=JSON.stringify(backupPayload(),null,2);
+    const blob=new Blob([json],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=backupFileName();
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+
+  function importBackupFile(input){
+    const file=input.files&&input.files[0];
+    input.value='';
+    if(!file) return;
+    const reader=new FileReader();
+    reader.onload=()=>{
+      try{
+        const payload=JSON.parse(reader.result);
+        if(!payload||payload.app!=='mis-objetivos'||!payload.data||typeof payload.data!=='object'){
+          alert('El archivo no parece ser una copia válida de esta app.');
+          return;
+        }
+        const count=Object.keys(payload.data).filter(k=>k.startsWith('mis_')).length;
+        if(!count){
+          alert('La copia no tiene datos para importar.');
+          return;
+        }
+        if(!confirm('Esto reemplazará los datos actuales por la copia seleccionada. ¿Continuar?')) return;
+        appStorageKeys().forEach(key=>localStorage.removeItem(key));
+        Object.entries(payload.data).forEach(([key,value])=>{
+          if(key.startsWith('mis_')&&typeof value==='string') localStorage.setItem(key,value);
+        });
+        alert('Datos restaurados. La app se va a recargar.');
+        location.reload();
+      }catch(e){
+        alert('No se pudo leer la copia. Verificá que sea un archivo JSON exportado desde esta app.');
+      }
+    };
+    reader.readAsText(file);
   }
 
   function changeMonth(dir){
@@ -894,16 +2380,36 @@
   // ===================== SAVE/LOAD =====================
   function save(){
     const state={};
-    document.querySelectorAll('.task').forEach(t=>{state['task_'+t.dataset.id]=t.classList.contains('done');});
+    document.querySelectorAll('.task').forEach(t=>{
+      state['task_'+t.dataset.id]=t.classList.contains('done');
+      state['taskdata_'+t.dataset.id]=JSON.stringify({due:t.dataset.due||'',priority:taskPriority(t),purpose:t.dataset.purpose||'',plan:t.dataset.plan||'',subtasks:getSubtasks(t)});
+    });
     document.querySelectorAll('.obj-card:not([data-custom])').forEach(card=>{
       const customTasks=[...card.querySelectorAll('.task[data-custom="true"]')].map(t=>({
-        id:t.dataset.id,text:t.querySelector('.task-text').textContent,done:t.classList.contains('done')
+        id:t.dataset.id,text:t.querySelector('.task-text').textContent,done:t.classList.contains('done'),due:t.dataset.due||'',priority:taskPriority(t),purpose:t.dataset.purpose||'',plan:t.dataset.plan||'',subtasks:getSubtasks(t)
       }));
       state['custom_'+card.dataset.id]=JSON.stringify(customTasks);
       state['open_'+card.dataset.id]=card.classList.contains('open');
     });
     localStorage.setItem('mis_objetivos',JSON.stringify(state));
     saveCustomObjectives();
+    saveObjMeta();
+    renderTodayAlerts();
+  }
+
+  function saveObjMeta(){
+    const meta={};
+    document.querySelectorAll('.obj-card').forEach(card=>{
+      meta[card.dataset.id]={
+        deadline:card.dataset.deadline||'',
+        alarmTime:card.dataset.alarmTime||'',
+        purpose:card.dataset.purpose||'',
+        plan:card.dataset.plan||'',
+        challengeType:card.dataset.challengeType||'',
+        routines:[]
+      };
+    });
+    localStorage.setItem('mis_obj_meta',JSON.stringify(meta));
   }
 
   function saveCustomObjectives(){
@@ -913,72 +2419,80 @@
       desc:card.querySelector('.obj-meta').textContent,
       icon:card.querySelector('.obj-icon').textContent,
       color:card.style.borderLeftColor,
+      deadline:card.dataset.deadline||'',
+      alarmTime:card.dataset.alarmTime||'',
+      purpose:card.dataset.purpose||'',
+      plan:card.dataset.plan||'',
+      challengeType:card.dataset.challengeType||'',
+      routines:[],
       open:card.classList.contains('open'),
       tasks:[...card.querySelectorAll('.task')].map(t=>({
-        id:t.dataset.id,text:t.querySelector('.task-text').textContent,done:t.classList.contains('done')
+        id:t.dataset.id,text:t.querySelector('.task-text').textContent,done:t.classList.contains('done'),due:t.dataset.due||'',priority:taskPriority(t),purpose:t.dataset.purpose||'',plan:t.dataset.plan||'',subtasks:getSubtasks(t)
       }))
     }));
     localStorage.setItem('mis_objetivos_custom',JSON.stringify(customs));
   }
 
   function load(){
+    const objMeta=JSON.parse(localStorage.getItem('mis_obj_meta')||'{}');
     // Standard objectives
     const saved=localStorage.getItem('mis_objetivos');
     if(saved){
       const state=JSON.parse(saved);
       document.querySelectorAll('.obj-card:not([data-custom])').forEach(card=>{
+        const meta=objMeta[card.dataset.id]||{};
+        card.dataset.deadline=meta.deadline||'';
+        card.dataset.alarmTime=meta.alarmTime||'';
+        card.dataset.purpose=meta.purpose||'';
+        card.dataset.plan=meta.plan||'';
+        card.dataset.challengeType=meta.challengeType||card.dataset.challengeType||'';
+        setObjRoutines(card,[]);
         const ct=state['custom_'+card.dataset.id];
         if(ct){
           const customTasks=JSON.parse(ct);
           const tasksDiv=card.querySelector('.tasks');
           const addRow=tasksDiv.querySelector('.add-task');
           customTasks.forEach(c=>{
-            const el=createTaskEl(c.text,c.id,c.done);
+            const el=createTaskEl(c.text,c.id,c.done,c.due||'',c.priority||5,c.subtasks||[],c.purpose||'',c.plan||'');
             tasksDiv.insertBefore(el,addRow);
           });
         }
         if(state['open_'+card.dataset.id]){card.classList.add('open');card.querySelector('.tasks').classList.add('open');}
       });
-      document.querySelectorAll('.task').forEach(t=>{if(state['task_'+t.dataset.id]) t.classList.add('done');});
+      document.querySelectorAll('.task').forEach(t=>{
+        const taskData=state['taskdata_'+t.dataset.id]?JSON.parse(state['taskdata_'+t.dataset.id]):{};
+        t.dataset.due=taskData.due||t.dataset.due||'';
+        t.dataset.priority=taskData.priority||t.dataset.priority||'5';
+        t.dataset.purpose=taskData.purpose||t.dataset.purpose||'';
+        t.dataset.plan=taskData.plan||t.dataset.plan||'';
+        setSubtasks(t,taskData.subtasks||getSubtasks(t));
+        if(state['task_'+t.dataset.id]) t.classList.add('done');
+      });
+    } else {
+      document.querySelectorAll('.obj-card:not([data-custom])').forEach(card=>{
+        const meta=objMeta[card.dataset.id]||{};
+        card.dataset.deadline=meta.deadline||'';
+        card.dataset.alarmTime=meta.alarmTime||'';
+        card.dataset.purpose=meta.purpose||'';
+        card.dataset.plan=meta.plan||'';
+        card.dataset.challengeType=meta.challengeType||card.dataset.challengeType||'';
+        setObjRoutines(card,[]);
+      });
     }
 
     // Custom objectives
     const customObjs=localStorage.getItem('mis_objetivos_custom');
     if(customObjs){
       JSON.parse(customObjs).forEach(obj=>{
-        const card=buildObjCard(obj.id,obj.name,obj.desc,obj.icon,obj.color,obj.tasks,false);
+        const meta=objMeta[obj.id]||{};
+        const routines=[];
+        const card=buildObjCard(obj.id,obj.name,obj.desc,obj.icon,obj.color,obj.tasks,false,obj.deadline||meta.deadline||'',obj.challengeType||meta.challengeType||'',routines,obj.alarmTime||meta.alarmTime||'',obj.purpose||meta.purpose||'',obj.plan||meta.plan||'');
         if(obj.open){card.classList.add('open');card.querySelector('.tasks').classList.add('open');}
         document.getElementById('objectives').appendChild(card);
       });
     }
 
-    // Recurring items
-    const recItems=localStorage.getItem('mis_rec_items');
-    if(recItems){
-      const list=document.getElementById('rec-list');
-      // Replace all items with saved ones
-      list.innerHTML='';
-      JSON.parse(recItems).forEach(r=>{
-        const el=document.createElement('div');
-        el.className='rec-item';
-        el.dataset.id=r.id;
-        if(r.custom) el.dataset.custom='true';
-        el.innerHTML=`<div class="rec-icon">${r.icon}</div><div class="rec-label">${r.label}</div><div class="rec-actions"><button class="icon-btn" onclick="editRecOpen(this.closest('.rec-item'))">✏️</button><button class="icon-btn del" onclick="deleteRec(this.closest('.rec-item'))">🗑️</button></div><div class="rec-check" onclick="toggleRec(this.parentElement)"></div>`;
-        list.appendChild(el);
-      });
-    }
-
-    // Recurring done state
-    const lastDay=localStorage.getItem('mis_rec_lastday');
-    if(lastDay===todayStr){
-      const recDone=JSON.parse(localStorage.getItem('mis_rec_done')||'[]');
-      recDone.forEach(id=>{
-        const el=document.querySelector(`.rec-item[data-id="${id}"]`);
-        if(el) el.classList.add('done');
-      });
-    }
-
-    updateAll(); updateRec(); checkRecStreak();
+    refreshDueBadges(); refreshObjRoutines(); updateAll(); saveObjMeta(); saveCustomObjectives(); renderTodayRoutines(); checkRecStreak();
   }
 
   function saveRecDone(){
@@ -991,19 +2505,73 @@
 
   function resetAll(){
     if(!confirm('¿Reiniciar TODO? Se borrará el progreso y los items personalizados.')) return;
-    ['mis_objetivos','mis_objetivos_custom','mis_rec_items','mis_rec_done','mis_rec_lastday','mis_rec_history','mis_cal_events'].forEach(k=>localStorage.removeItem(k));
+    appStorageKeys().forEach(k=>localStorage.removeItem(k));
     location.reload();
   }
 
   // Override saveRec in toggleRec context to also persist done
   function toggleRec(el){
-    el.classList.toggle('done');
-    if(el.classList.contains('done')) logCalEvent(todayStr,'rec',el.querySelector('.rec-label').textContent);
-    saveRecDone(); updateRec(); checkRecStreak();
+    const items=recItems();
+    const routine=items.find(r=>r.id===el.dataset.id);
+    if(!routine) return;
+    const done=!isRecDoneToday(routine.id);
+    if(done&&!askCompletionBenefit('routine',routine.id,routine.label)) return;
+    if(done&&!applyRoutineAdvance(routine)) return;
+    setRecDoneToday(routine.id,done);
+    if(done&&routine.repeat==='once') routine.doneOnce=true;
+    saveRecItems(items);
+    if(done) logCalEvent(todayStr,'routine','Rutina cumplida: '+routine.label+(routine.objectiveName?' · Objetivo: '+routine.objectiveName:'')+(routine.taskName?' · Tarea: '+routine.taskName:'')+(routine.subtaskName?' · Subtarea: '+routine.subtaskName:''));
+    renderTodayRoutines();
+    renderTodayAlerts();
+    if(document.getElementById('page-calendar').classList.contains('active')) renderCalendar();
+  }
+
+  function applyRoutineAdvance(routine){
+    let objectiveId=routine.objectiveId||'';
+    let taskId=routine.taskId||'';
+    let subtaskId=routine.subtaskId||'';
+    if((!objectiveId||!taskId)&&routine.target){
+      const legacy=getRoutineSelectionFromLegacyTarget(routine.target);
+      objectiveId=legacy.objectiveId;
+      taskId=legacy.taskId;
+      subtaskId=legacy.subtaskId;
+    }
+    if(!objectiveId||!taskId) return true;
+    const card=document.querySelector(`.obj-card[data-id="${objectiveId}"]`);
+    if(!card) return true;
+    const task=card.querySelector(`.task[data-id="${taskId}"]`);
+    if(!task) return true;
+    if(!ensurePurpose(task,'esta tarea',task.querySelector('.task-text').textContent)) return false;
+    const subtasks=getSubtasks(task);
+    if(subtaskId){
+      const subtask=subtasks.find(s=>s.id===subtaskId);
+      if(!subtask) return true;
+      if(!askCompletionBenefit('subtask',subtask.id,subtask.text)) return false;
+      subtask.done=true;
+      setSubtasks(task,subtasks);
+      renderSubtasks(task);
+      logCalEvent(todayStr,'obj',subtask.text);
+    } else {
+      if(!askCompletionBenefit('task',task.dataset.id,task.querySelector('.task-text').textContent)) return false;
+      if(subtasks.length){
+        subtasks.forEach(s=>s.done=true);
+        setSubtasks(task,subtasks);
+        renderSubtasks(task);
+      } else {
+        task.classList.add('done');
+        renderTaskProgress(task);
+      }
+      logCalEvent(todayStr,'obj',task.querySelector('.task-text').textContent);
+    }
+    updateAll();
+    save();
+    maybeAskObjectiveBenefit(card);
+    return true;
   }
 
   // INIT
   window.addEventListener('load',()=>{
+    registerPwa();
     calYear=today.getFullYear(); calMonth=today.getMonth();
     const months=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
     const days=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
@@ -1011,6 +2579,10 @@
     document.getElementById('rec-date-label').textContent=days[today.getDay()]+' '+today.getDate()+'/'+(today.getMonth()+1)+'/'+today.getFullYear();
     checkDayReset();
     load();
+    renderTodayAlerts();
+    renderMoney();
+    checkAlarms();
+    setInterval(checkAlarms,30000);
   });
 </script>
 </body>
