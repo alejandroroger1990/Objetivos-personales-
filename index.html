@@ -193,6 +193,7 @@
   .backup-title{font-size:.85rem;font-weight:700;margin-bottom:.2rem;}
   .backup-text{font-size:.72rem;color:var(--muted);line-height:1.35;margin-bottom:.75rem;}
   .backup-actions{display:flex;gap:.5rem;flex-wrap:wrap;}
+  .save-status{font-size:.68rem;color:var(--muted);margin-top:.55rem;}
 
   /* CALENDAR */
   .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
@@ -409,10 +410,12 @@
     <div class="backup-title">Copia de seguridad</div>
     <div class="backup-text">Exportá tus datos antes de borrar caché, cambiar de celular o reinstalar la app.</div>
     <div class="backup-actions">
+      <button class="btn-primary" onclick="manualSave()">Guardar ahora</button>
       <button class="btn-secondary" onclick="exportBackup()">Exportar datos</button>
       <button class="btn-secondary" onclick="document.getElementById('backup-file').click()">Importar datos</button>
       <input id="backup-file" type="file" accept="application/json,.json" style="display:none" onchange="importBackupFile(this)">
     </div>
+    <div class="save-status" id="save-status">Autoguardado activo</div>
   </div>
 </div>
 
@@ -738,6 +741,7 @@
   let taskCounter=100, objCounter=200, recCounter=300;
   let selObjEmoji='⭐', selObjColor='#e05c2a', selRecEmojiVal='⚡';
   let editingTaskEl=null, editingRecEl=null, newTaskAddRow=null;
+  let appLoaded=false, autosaveTimer=null;
   let calYear, calMonth;
   const today=new Date(), todayStr=dateStr(today);
 
@@ -1374,6 +1378,7 @@
     document.getElementById('task-modal').style.display='none';
     editingTaskEl=null;
     newTaskAddRow=null;
+    clearAutosaveDraft();
   }
 
   function addSubtaskField(subtask){
@@ -1477,6 +1482,7 @@
     document.getElementById('obj-modal-overlay').style.display='none';
     document.getElementById('obj-modal').style.display='none';
     document.getElementById('edit-obj-id').value='';
+    clearAutosaveDraft();
   }
 
   function saveObj(){
@@ -1856,6 +1862,7 @@
     document.getElementById('rec-modal-overlay').style.display='none';
     document.getElementById('rec-modal').style.display='none';
     editingRecEl=null;
+    clearAutosaveDraft();
   }
 
   function selRecEmoji(el){
@@ -2296,6 +2303,193 @@
     return type==='obj'?'✅':type==='rec'||type==='routine'?'🔄':type==='income'?'💵':type==='expense'?'💸':type==='full'?'🔥':'⭐';
   }
 
+  // ===================== AUTOSAVE =====================
+  function nowTimeLabel(){
+    const d=new Date();
+    return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  }
+
+  function setSaveStatus(text){
+    const el=document.getElementById('save-status');
+    if(el) el.textContent=text;
+  }
+
+  function captureOpenDraft(){
+    const visible=id=>document.getElementById(id)&&document.getElementById(id).style.display==='block';
+    if(visible('obj-modal')){
+      return {
+        type:'objective',
+        editId:document.getElementById('edit-obj-id').value||'',
+        fields:{
+          name:document.getElementById('new-obj-name').value,
+          desc:document.getElementById('new-obj-desc').value,
+          purpose:document.getElementById('new-obj-purpose').value,
+          plan:document.getElementById('new-obj-plan').value,
+          deadline:document.getElementById('new-obj-deadline').value,
+          alarmTime:document.getElementById('new-obj-alarm-time').value,
+          challengeType:document.getElementById('new-obj-type').value,
+          emoji:selObjEmoji,
+          color:selObjColor
+        }
+      };
+    }
+    if(visible('task-modal')){
+      return {
+        type:'task',
+        editId:editingTaskEl?editingTaskEl.dataset.id:'',
+        parentObjectiveId:newTaskAddRow?newTaskAddRow.closest('.obj-card').dataset.id:'',
+        fields:{
+          text:document.getElementById('edit-task-text').value,
+          purpose:document.getElementById('edit-task-purpose').value,
+          plan:document.getElementById('edit-task-plan').value,
+          due:document.getElementById('edit-task-due').value,
+          priority:document.getElementById('edit-task-priority').value,
+          subtasks:collectSubtaskDraft()
+        }
+      };
+    }
+    if(visible('rec-modal')){
+      return {
+        type:'routine',
+        editId:document.getElementById('edit-rec-id').value||'',
+        fields:{
+          name:document.getElementById('new-rec-name').value,
+          purpose:document.getElementById('new-rec-purpose').value,
+          plan:document.getElementById('new-rec-plan').value,
+          objectiveId:document.getElementById('new-rec-objective').value,
+          taskId:document.getElementById('new-rec-task').value,
+          subtaskId:document.getElementById('new-rec-subtask').value,
+          repeat:document.getElementById('new-rec-repeat').value,
+          days:[...document.querySelectorAll('#new-rec-days input:checked')].map(i=>Number(i.value)),
+          date:document.getElementById('new-rec-date').value,
+          time:document.getElementById('new-rec-time').value,
+          emoji:selRecEmojiVal
+        }
+      };
+    }
+    return null;
+  }
+
+  function collectSubtaskDraft(){
+    return [...document.querySelectorAll('#subtask-editor .subtask-editor')].map(row=>({
+      id:row.dataset.subtaskId,
+      text:row.querySelector('.subtask-name').value,
+      purpose:row.querySelector('.subtask-purpose').value,
+      priority:row.querySelector('.subtask-prio').value||'5',
+      done:row.dataset.done==='true'
+    }));
+  }
+
+  function saveDraft(){
+    const draft=captureOpenDraft();
+    if(draft) localStorage.setItem('mis_autosave_draft',JSON.stringify({...draft,savedAt:new Date().toISOString()}));
+    else localStorage.removeItem('mis_autosave_draft');
+  }
+
+  function clearAutosaveDraft(){
+    localStorage.removeItem('mis_autosave_draft');
+  }
+
+  function persistAll(showStatus=false){
+    if(!appLoaded) return;
+    save();
+    saveRecItems(recItems());
+    saveDraft();
+    localStorage.setItem('mis_last_manual_save',new Date().toISOString());
+    if(showStatus) setSaveStatus('Guardado '+nowTimeLabel());
+  }
+
+  function manualSave(){
+    persistAll(true);
+    alert('Datos guardados.');
+  }
+
+  function scheduleAutosave(){
+    if(!appLoaded) return;
+    clearTimeout(autosaveTimer);
+    autosaveTimer=setTimeout(()=>persistAll(true),800);
+  }
+
+  function setupAutosave(){
+    document.addEventListener('input',scheduleAutosave,true);
+    document.addEventListener('change',scheduleAutosave,true);
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden') persistAll(false);});
+    window.addEventListener('pagehide',()=>persistAll(false));
+    window.addEventListener('beforeunload',()=>persistAll(false));
+    setInterval(()=>persistAll(true),30000);
+  }
+
+  function restoreAutosaveDraft(){
+    const raw=localStorage.getItem('mis_autosave_draft');
+    if(!raw) return;
+    let draft=null;
+    try{draft=JSON.parse(raw);}catch(e){localStorage.removeItem('mis_autosave_draft');return;}
+    if(!draft||!draft.type||!draft.fields) return;
+    if(!confirm('Hay un borrador sin guardar. ¿Querés recuperarlo?')){
+      localStorage.removeItem('mis_autosave_draft');
+      return;
+    }
+    if(draft.type==='objective') restoreObjectiveDraft(draft);
+    if(draft.type==='task') restoreTaskDraft(draft);
+    if(draft.type==='routine') restoreRoutineDraft(draft);
+  }
+
+  function restoreObjectiveDraft(draft){
+    if(draft.editId) document.getElementById('edit-obj-id').value=draft.editId;
+    openObjModal();
+    const f=draft.fields;
+    document.getElementById('new-obj-name').value=f.name||'';
+    document.getElementById('new-obj-desc').value=f.desc||'';
+    document.getElementById('new-obj-purpose').value=f.purpose||'';
+    document.getElementById('new-obj-plan').value=f.plan||'';
+    document.getElementById('new-obj-deadline').value=f.deadline||'';
+    document.getElementById('new-obj-alarm-time').value=f.alarmTime||'';
+    document.getElementById('new-obj-type').value=f.challengeType||'';
+    selObjEmoji=f.emoji||selObjEmoji;
+    selObjColor=f.color||selObjColor;
+    document.getElementById('obj-modal-title').textContent=draft.editId?'Editar Objetivo':'Nuevo Objetivo';
+    document.getElementById('obj-modal-save').textContent=draft.editId?'GUARDAR CAMBIOS':'CREAR OBJETIVO';
+  }
+
+  function restoreTaskDraft(draft){
+    const task=draft.editId?document.querySelector(`.task[data-id="${draft.editId}"]`):null;
+    if(task) editTaskOpen(task);
+    else {
+      const card=document.querySelector(`.obj-card[data-id="${draft.parentObjectiveId}"]`)||document.querySelector('.obj-card');
+      const addRow=card&&card.querySelector('.add-task');
+      if(!addRow) return;
+      openNewTaskModal(addRow);
+    }
+    const f=draft.fields;
+    document.getElementById('edit-task-text').value=f.text||'';
+    document.getElementById('edit-task-purpose').value=f.purpose||'';
+    document.getElementById('edit-task-plan').value=f.plan||'';
+    document.getElementById('edit-task-due').value=f.due||'';
+    document.getElementById('edit-task-priority').value=f.priority||'5';
+    setSubtaskEditor(f.subtasks||[]);
+  }
+
+  function restoreRoutineDraft(draft){
+    if(draft.editId){
+      const row=document.querySelector(`.rec-item[data-id="${draft.editId}"]`);
+      if(row) editRecOpen(row);
+      else openRecModal();
+    } else openRecModal();
+    const f=draft.fields;
+    document.getElementById('new-rec-name').value=f.name||'';
+    document.getElementById('new-rec-purpose').value=f.purpose||'';
+    document.getElementById('new-rec-plan').value=f.plan||'';
+    fillRecObjectiveSelect(f.objectiveId||'');
+    fillRecTaskSelect(f.taskId||'');
+    fillRecSubtaskSelect(f.subtaskId||'');
+    document.getElementById('new-rec-repeat').value=f.repeat||'daily';
+    document.querySelectorAll('#new-rec-days input').forEach(i=>i.checked=(f.days||[]).includes(Number(i.value)));
+    document.getElementById('new-rec-date').value=f.date||todayStr;
+    document.getElementById('new-rec-time').value=f.time||'';
+    selRecEmojiVal=f.emoji||selRecEmojiVal;
+    toggleRecScheduleFields();
+  }
+
   // ===================== BACKUP =====================
   function appStorageKeys(){
     const keys=[];
@@ -2413,7 +2607,13 @@
   }
 
   function saveCustomObjectives(){
-    const customs=[...document.querySelectorAll('.obj-card[data-custom="true"]')].map(card=>({
+    const seen=new Set();
+    const cards=[...document.querySelectorAll('.obj-card[data-custom="true"]')].filter(card=>{
+      if(seen.has(card.dataset.id)) return false;
+      seen.add(card.dataset.id);
+      return true;
+    });
+    const customs=cards.map(card=>({
       id:card.dataset.id,
       name:card.querySelector('.obj-name').textContent,
       desc:card.querySelector('.obj-meta').textContent,
@@ -2483,7 +2683,12 @@
     // Custom objectives
     const customObjs=localStorage.getItem('mis_objetivos_custom');
     if(customObjs){
-      JSON.parse(customObjs).forEach(obj=>{
+      const seenCustom=new Set();
+      JSON.parse(customObjs).filter(obj=>{
+        if(!obj||!obj.id||seenCustom.has(obj.id)) return false;
+        seenCustom.add(obj.id);
+        return true;
+      }).forEach(obj=>{
         const meta=objMeta[obj.id]||{};
         const routines=[];
         const card=buildObjCard(obj.id,obj.name,obj.desc,obj.icon,obj.color,obj.tasks,false,obj.deadline||meta.deadline||'',obj.challengeType||meta.challengeType||'',routines,obj.alarmTime||meta.alarmTime||'',obj.purpose||meta.purpose||'',obj.plan||meta.plan||'');
@@ -2579,6 +2784,10 @@
     document.getElementById('rec-date-label').textContent=days[today.getDay()]+' '+today.getDate()+'/'+(today.getMonth()+1)+'/'+today.getFullYear();
     checkDayReset();
     load();
+    appLoaded=true;
+    setupAutosave();
+    restoreAutosaveDraft();
+    setSaveStatus('Autoguardado activo · '+nowTimeLabel());
     renderTodayAlerts();
     renderMoney();
     checkAlarms();
