@@ -15,7 +15,7 @@
   :root {
     --bg:#111318; --card:#1e2130; --card2:#252a3a; --border:#2d3347;
     --light:#edeae0; --muted:#6b7194;
-    --work:#e05c2a; --health:#2ecc71; --finance:#f5a623; --family:#a78bfa; --recurring:#38bdf8;
+    --work:#e05c2a; --health:#2ecc71; --finance:#f5a623; --family:#a78bfa; --personal:#f472b6; --recurring:#38bdf8;
     --danger:#e74c3c;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -52,6 +52,7 @@
   .cat-tab[data-cat="health"].active{background:var(--health);}
   .cat-tab[data-cat="finance"].active{background:var(--finance);}
   .cat-tab[data-cat="family"].active{background:var(--family);}
+  .cat-tab[data-cat="personal"].active{background:var(--personal);}
 
   /* OBJ CARDS */
   .objectives{display:flex;flex-direction:column;gap:.8rem;}
@@ -59,6 +60,7 @@
   .obj-card[data-cat="health"]{border-left-color:var(--health);}
   .obj-card[data-cat="finance"]{border-left-color:var(--finance);}
   .obj-card[data-cat="family"]{border-left-color:var(--family);}
+  .obj-card[data-cat="personal"]{border-left-color:var(--personal);}
   .obj-card.hidden{display:none;}
 
   .obj-header{padding:.9rem 1rem .6rem;display:flex;align-items:center;gap:.7rem;}
@@ -71,6 +73,7 @@
   .obj-card[data-cat="health"] .obj-pct{color:var(--health);}
   .obj-card[data-cat="finance"] .obj-pct{color:var(--finance);}
   .obj-card[data-cat="family"] .obj-pct{color:var(--family);}
+  .obj-card[data-cat="personal"] .obj-pct{color:var(--personal);}
 
   /* EDIT/DELETE BUTTONS on obj header */
   .obj-actions{display:flex;gap:.3rem;flex-shrink:0;}
@@ -194,6 +197,8 @@
   .backup-text{font-size:.72rem;color:var(--muted);line-height:1.35;margin-bottom:.75rem;}
   .backup-actions{display:flex;gap:.5rem;flex-wrap:wrap;}
   .save-status{font-size:.68rem;color:var(--muted);margin-top:.55rem;}
+  .help-btn{border:none;background:var(--card2);color:var(--finance);width:28px;height:28px;border-radius:50%;font-weight:800;cursor:pointer;flex-shrink:0;}
+  .section-line{display:flex;align-items:center;justify-content:space-between;gap:.8rem;margin:.8rem 0 1rem;}
 
   /* CALENDAR */
   .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
@@ -291,6 +296,10 @@
 
 <!-- PAGE: OBJECTIVES -->
 <div class="page active" id="page-objectives">
+  <div class="section-line">
+    <div class="overall-label">Objetivos</div>
+    <button class="help-btn" onclick="showHelp('objectives')" title="Ayuda">?</button>
+  </div>
   <div class="overall" style="margin-top:.8rem">
     <div class="overall-top">
       <span class="overall-label">Progreso general</span>
@@ -300,37 +309,12 @@
   </div>
   <div class="cat-tabs">
     <div class="cat-tab active" data-cat="all" onclick="filterCat('all')">Todos</div>
-    <div class="cat-tab" data-cat="work" onclick="filterCat('work')">💼 Negocio</div>
-    <div class="cat-tab" data-cat="health" onclick="filterCat('health')">💪 Salud</div>
     <div class="cat-tab" data-cat="finance" onclick="filterCat('finance')">💰 Finanzas</div>
-    <div class="cat-tab" data-cat="family" onclick="filterCat('family')">❤️ Personal</div>
+    <div class="cat-tab" data-cat="health" onclick="filterCat('health')">💪 Salud</div>
+    <div class="cat-tab" data-cat="family" onclick="filterCat('family')">❤️ Familia</div>
+    <div class="cat-tab" data-cat="personal" onclick="filterCat('personal')">🌱 Personales</div>
   </div>
   <div class="objectives" id="objectives">
-
-    <div class="obj-card" data-cat="work" data-id="obj_work" data-challenge-type="long">
-      <div class="obj-header">
-        <div class="obj-icon" onclick="toggleObj(this.closest('.obj-card'))">💼</div>
-        <div class="obj-info" onclick="toggleObj(this.closest('.obj-card'))">
-          <div class="obj-name">Abrir la Ferretería</div>
-          <div class="obj-meta">Reapertura y primeras ventas</div>
-        </div>
-        <div class="obj-pct">0%</div>
-        <div class="obj-actions">
-          <button class="icon-btn" onclick="editObjOpen(this.closest('.obj-card'))" title="Editar">✏️</button>
-          <button class="icon-btn del" onclick="deleteObj(this.closest('.obj-card'))" title="Eliminar">🗑️</button>
-        </div>
-        <div class="chevron" onclick="toggleObj(this.closest('.obj-card'))">▼</div>
-      </div>
-      <div class="obj-bar"><div class="obj-bar-fill"></div></div>
-      <div class="tasks">
-        <div class="task" data-id="t1"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Hacer inventario del stock existente</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
-        <div class="task" data-id="t2"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Gestionar habilitación municipal</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
-        <div class="task" data-id="t3"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Acondicionar y limpiar el local</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
-        <div class="task" data-id="t4"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Crear WhatsApp Business + catálogo</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
-        <div class="task" data-id="t5"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Conseguir primer cliente B2B</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
-        <div class="add-task"><input type="text" placeholder="Agregar tarea..." onkeydown="addTask(event,this)"><button onclick="addTask(null,this.previousElementSibling)">+</button></div>
-      </div>
-    </div>
 
     <div class="obj-card" data-cat="health" data-id="obj_health">
       <div class="obj-header">
@@ -372,7 +356,7 @@
       <div class="obj-bar"><div class="obj-bar-fill"></div></div>
       <div class="tasks">
         <div class="task" data-id="t9"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Armar presupuesto mensual personal</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
-        <div class="task" data-id="t10"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Separar gastos personales de la ferretería</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
+        <div class="task" data-id="t10"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Registrar ingresos y gastos de la semana</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
         <div class="task" data-id="t11"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Establecer un fondo de ahorro mensual</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
         <div class="add-task"><input type="text" placeholder="Agregar tarea..." onkeydown="addTask(event,this)"><button onclick="addTask(null,this.previousElementSibling)">+</button></div>
       </div>
@@ -382,8 +366,8 @@
       <div class="obj-header">
         <div class="obj-icon" onclick="toggleObj(this.closest('.obj-card'))">❤️</div>
         <div class="obj-info" onclick="toggleObj(this.closest('.obj-card'))">
-          <div class="obj-name">Familia y Personal</div>
-          <div class="obj-meta">Bienestar y vínculos</div>
+          <div class="obj-name">Familia</div>
+          <div class="obj-meta">Vínculos, presencia y organización familiar</div>
         </div>
         <div class="obj-pct">0%</div>
         <div class="obj-actions">
@@ -396,7 +380,30 @@
       <div class="tasks">
         <div class="task" data-id="t12"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Tiempo de calidad con familia cada semana</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
         <div class="task" data-id="t13"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Planificar una salida o viaje</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
-        <div class="task" data-id="t14"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Aprender algo nuevo este mes</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
+        <div class="task" data-id="t14"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Organizar una conversación o plan familiar</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
+        <div class="add-task"><input type="text" placeholder="Agregar tarea..." onkeydown="addTask(event,this)"><button onclick="addTask(null,this.previousElementSibling)">+</button></div>
+      </div>
+    </div>
+
+    <div class="obj-card" data-cat="personal" data-id="obj_personal">
+      <div class="obj-header">
+        <div class="obj-icon" onclick="toggleObj(this.closest('.obj-card'))">🌱</div>
+        <div class="obj-info" onclick="toggleObj(this.closest('.obj-card'))">
+          <div class="obj-name">Personales</div>
+          <div class="obj-meta">Crecimiento, orden personal y proyectos propios</div>
+        </div>
+        <div class="obj-pct">0%</div>
+        <div class="obj-actions">
+          <button class="icon-btn" onclick="editObjOpen(this.closest('.obj-card'))">✏️</button>
+          <button class="icon-btn del" onclick="deleteObj(this.closest('.obj-card'))">🗑️</button>
+        </div>
+        <div class="chevron" onclick="toggleObj(this.closest('.obj-card'))">▼</div>
+      </div>
+      <div class="obj-bar"><div class="obj-bar-fill"></div></div>
+      <div class="tasks">
+        <div class="task" data-id="t15"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Definir una prioridad personal de la semana</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
+        <div class="task" data-id="t16"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Dedicar 30 minutos a aprender algo nuevo</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
+        <div class="task" data-id="t17"><div class="task-check" onclick="toggleTask(this.parentElement)"></div><div class="task-text" onclick="toggleTask(this.parentElement)">Ordenar un espacio o pendiente personal</div><div class="task-actions"><button class="icon-btn" onclick="editTaskOpen(this.closest('.task'))">✏️</button><button class="icon-btn del" onclick="deleteTask(this.closest('.task'))">🗑️</button></div></div>
         <div class="add-task"><input type="text" placeholder="Agregar tarea..." onkeydown="addTask(event,this)"><button onclick="addTask(null,this.previousElementSibling)">+</button></div>
       </div>
     </div>
@@ -423,7 +430,10 @@
 <div class="page" id="page-recurring">
   <div class="rec-header" style="margin-top:.8rem">
     <div class="rec-title">Rutinas Diarias</div>
-    <div class="rec-date" id="rec-date-label"></div>
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <div class="rec-date" id="rec-date-label"></div>
+      <button class="help-btn" onclick="showHelp('recurring')" title="Ayuda">?</button>
+    </div>
   </div>
   <div class="notify-row">
     <div>
@@ -457,7 +467,10 @@
 <div class="page" id="page-calendar">
   <div class="cal-nav" style="margin-top:.8rem">
     <button class="cal-btn" onclick="changeMonth(-1)">◀</button>
-    <div class="cal-month" id="cal-month-label"></div>
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <div class="cal-month" id="cal-month-label"></div>
+      <button class="help-btn" onclick="showHelp('calendar')" title="Ayuda">?</button>
+    </div>
     <button class="cal-btn" onclick="changeMonth(1)">▶</button>
   </div>
   <div class="cal-grid" id="cal-grid"></div>
@@ -476,6 +489,10 @@
 
 <!-- PAGE: MONEY -->
 <div class="page" id="page-money">
+  <div class="section-line">
+    <div class="overall-label">Dinero</div>
+    <button class="help-btn" onclick="showHelp('money')" title="Ayuda">?</button>
+  </div>
   <div class="money-summary">
     <div class="money-box">
       <div class="money-label">Ingresos</div>
@@ -1250,6 +1267,16 @@
     if(name==='calendar') renderCalendar();
     if(name==='recurring') renderTodayRoutines();
     if(name==='money') renderMoney();
+  }
+
+  function showHelp(section){
+    const help={
+      objectives:'Objetivos: acá creás metas principales. Cada objetivo puede tener tareas y subtareas con prioridad, fecha, propósito y una barra de avance. Todo se puede editar o eliminar. Las rutinas se asocian a un objetivo desde la pestaña Rutinas.',
+      recurring:'Rutinas: acá creás acciones repetidas o de un solo día. Primero elegís el objetivo asociado, después tarea y subtarea si corresponde. Al cumplir una rutina, se marca el avance dentro del objetivo.',
+      calendar:'Calendario: muestra vencimientos, rutinas pendientes, rutinas cumplidas, tareas realizadas e ingresos/gastos. Al tocar un día ves pendientes de ese día, lo cumplido y un adelanto del día siguiente.',
+      money:'Dinero: registrás ingresos y gastos con fecha y hora. Los gastos pueden ser fijos o variables y se clasifican por categoría. Todo queda reflejado también en el calendario.'
+    };
+    alert(help[section]||'Ayuda no disponible.');
   }
 
   // ===================== OBJECTIVES =====================
