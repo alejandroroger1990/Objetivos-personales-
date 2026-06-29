@@ -1422,7 +1422,11 @@
 
   function deleteObj(card){
     const title=card.querySelector('.obj-name').textContent;
-    if(askDeletionReason('objective',title)){ card.remove(); updateAll(); save(); }
+    if(askDeletionReason('objective',title)){
+      if(!card.dataset.custom) markDefaultObjectiveDeleted(card.dataset.id);
+      card.remove();
+      updateAll(); save();
+    }
   }
 
   function editObjOpen(card){
@@ -1504,7 +1508,7 @@
       if(card){
         card.querySelector('.obj-icon').textContent=selObjEmoji;
         card.querySelector('.obj-name').textContent=name;
-        card.querySelector('.obj-meta').textContent=desc||card.querySelector('.obj-meta').textContent;
+        card.querySelector('.obj-meta').textContent=desc;
         card.dataset.purpose=purpose;
         card.dataset.plan=plan;
         card.dataset.deadline=deadline;
@@ -2572,11 +2576,41 @@
   }
 
   // ===================== SAVE/LOAD =====================
+  function deletedDefaultObjectives(){
+    try{return JSON.parse(localStorage.getItem('mis_deleted_default_objectives')||'[]');}
+    catch(e){return [];}
+  }
+
+  function markDefaultObjectiveDeleted(id){
+    const deleted=deletedDefaultObjectives();
+    if(!deleted.includes(id)) deleted.push(id);
+    localStorage.setItem('mis_deleted_default_objectives',JSON.stringify(deleted));
+  }
+
+  function applyObjectiveMeta(card,meta){
+    if(!card||!meta) return;
+    if(meta.name) card.querySelector('.obj-name').textContent=meta.name;
+    if(meta.desc!==undefined) card.querySelector('.obj-meta').textContent=meta.desc;
+    if(meta.icon) card.querySelector('.obj-icon').textContent=meta.icon;
+    if(meta.color){
+      card.style.borderLeftColor=meta.color;
+      const fill=card.querySelector('.obj-bar-fill');
+      if(fill) fill.style.background=meta.color;
+      const pct=card.querySelector('.obj-pct');
+      if(pct) pct.style.color=meta.color;
+    }
+    card.dataset.deadline=meta.deadline||'';
+    card.dataset.alarmTime=meta.alarmTime||'';
+    card.dataset.purpose=meta.purpose||'';
+    card.dataset.plan=meta.plan||'';
+    card.dataset.challengeType=meta.challengeType||card.dataset.challengeType||'';
+  }
+
   function save(){
     const state={};
     document.querySelectorAll('.task').forEach(t=>{
       state['task_'+t.dataset.id]=t.classList.contains('done');
-      state['taskdata_'+t.dataset.id]=JSON.stringify({due:t.dataset.due||'',priority:taskPriority(t),purpose:t.dataset.purpose||'',plan:t.dataset.plan||'',subtasks:getSubtasks(t)});
+      state['taskdata_'+t.dataset.id]=JSON.stringify({text:t.querySelector('.task-text').textContent,due:t.dataset.due||'',priority:taskPriority(t),purpose:t.dataset.purpose||'',plan:t.dataset.plan||'',subtasks:getSubtasks(t)});
     });
     document.querySelectorAll('.obj-card:not([data-custom])').forEach(card=>{
       const customTasks=[...card.querySelectorAll('.task[data-custom="true"]')].map(t=>({
@@ -2595,6 +2629,12 @@
     const meta={};
     document.querySelectorAll('.obj-card').forEach(card=>{
       meta[card.dataset.id]={
+        name:card.querySelector('.obj-name').textContent,
+        desc:card.querySelector('.obj-meta').textContent,
+        icon:card.querySelector('.obj-icon').textContent,
+        color:card.style.borderLeftColor,
+        custom:card.dataset.custom==='true',
+        cat:card.dataset.cat||'custom',
         deadline:card.dataset.deadline||'',
         alarmTime:card.dataset.alarmTime||'',
         purpose:card.dataset.purpose||'',
@@ -2635,17 +2675,17 @@
 
   function load(){
     const objMeta=JSON.parse(localStorage.getItem('mis_obj_meta')||'{}');
+    const deletedDefaults=deletedDefaultObjectives();
+    document.querySelectorAll('.obj-card:not([data-custom])').forEach(card=>{
+      if(deletedDefaults.includes(card.dataset.id)) card.remove();
+    });
     // Standard objectives
     const saved=localStorage.getItem('mis_objetivos');
     if(saved){
       const state=JSON.parse(saved);
       document.querySelectorAll('.obj-card:not([data-custom])').forEach(card=>{
         const meta=objMeta[card.dataset.id]||{};
-        card.dataset.deadline=meta.deadline||'';
-        card.dataset.alarmTime=meta.alarmTime||'';
-        card.dataset.purpose=meta.purpose||'';
-        card.dataset.plan=meta.plan||'';
-        card.dataset.challengeType=meta.challengeType||card.dataset.challengeType||'';
+        applyObjectiveMeta(card,meta);
         setObjRoutines(card,[]);
         const ct=state['custom_'+card.dataset.id];
         if(ct){
@@ -2661,6 +2701,7 @@
       });
       document.querySelectorAll('.task').forEach(t=>{
         const taskData=state['taskdata_'+t.dataset.id]?JSON.parse(state['taskdata_'+t.dataset.id]):{};
+        if(taskData.text) t.querySelector('.task-text').textContent=taskData.text;
         t.dataset.due=taskData.due||t.dataset.due||'';
         t.dataset.priority=taskData.priority||t.dataset.priority||'5';
         t.dataset.purpose=taskData.purpose||t.dataset.purpose||'';
@@ -2671,11 +2712,7 @@
     } else {
       document.querySelectorAll('.obj-card:not([data-custom])').forEach(card=>{
         const meta=objMeta[card.dataset.id]||{};
-        card.dataset.deadline=meta.deadline||'';
-        card.dataset.alarmTime=meta.alarmTime||'';
-        card.dataset.purpose=meta.purpose||'';
-        card.dataset.plan=meta.plan||'';
-        card.dataset.challengeType=meta.challengeType||card.dataset.challengeType||'';
+        applyObjectiveMeta(card,meta);
         setObjRoutines(card,[]);
       });
     }
